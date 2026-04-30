@@ -1,0 +1,44 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Repository Nature
+
+This repo is a **Claude Code skill**, not a software project. There is no build, no test runner, no lint, no package manifest. All artifacts are Markdown — the value is in the prompt content itself.
+
+- `SKILL.md` is the entry point loaded by Claude Code when the skill activates. Its YAML frontmatter (`name`, `description`) controls when the skill triggers — edits there change activation behaviour, not just docs.
+- `references/phase{1..4}-*.md` hold the detailed methods/formats for each phase. SKILL.md deliberately defers to them; phase work must `Read` the relevant reference rather than rely on memory.
+- `references/templates/*.md` are copied verbatim into a user's `.claude/` directory at bootstrap. `references/agents/bc-developer.md` is copied to `.claude/agents/`. Treat them as user-facing assets, not internal docs.
+
+Most files are `chmod 444` (read-only) on disk. If an edit is needed, `chmod u+w` first; the read-only bit signals "stable surface, change deliberately."
+
+## Editing Rules Specific to This Skill
+
+When modifying skill content, the following invariants must be preserved (violating them will break the skill in production):
+
+1. **SKILL.md frontmatter `description`** is the trigger surface. It enumerates the slash commands (`/arch-coach`, `/phase-1..4`, `/arch-learn`) and the topical keywords (Bounded Context, Aggregate, AI-ADR…) that Claude Code matches against user prompts. Adding capabilities means updating this description, not just the body.
+2. **Bilingual policy** — instructions to Claude are written in English; user-facing output is Traditional Chinese with technical terms left in English. Chinese text inside `「...」` quotation marks is verbatim output to reproduce, not paraphrasable example copy.
+3. **Decision-priority ordering** in SKILL.md (Domain correctness > fallback > verifiability > team executability) is referenced by name from the phase files. Re-ordering requires updating downstream references.
+4. **AI veto conditions** (four listed in SKILL.md) are referenced by Phase 2's AI-ADR workflow. Keep wording aligned across files.
+5. **File-structure contract** — `docs/system/{domain-stories,context-map}.md` and `docs/{bc}/{discovery,decisions,spec}.md` are the artifact paths the skill produces in user projects. Phase files assume these exact paths.
+6. **Phase-selection state machine** in SKILL.md ("State determination" section) reads `arch-state.md` to decide which phase to enter. Adding a phase or step requires updating both the state machine and `arch-state-template.md`.
+
+## Content Architecture
+
+The skill operates as a **producer/reviewer** workflow, not a Q&A coach: Claude drafts artifacts (narratives, UL tables, aggregates, AI-ADRs), the user reviews and challenges. This shapes every reference file — phase files instruct Claude to *produce*, never to ask the user to fill blanks.
+
+Two-axis flow:
+
+- **System-level** runs once per project: Phase 1 Steps 1–4 produce `domain-stories.md` + the classification section of `context-map.md`.
+- **Per-BC** runs independently per Bounded Context: Phase 1 Steps 5–6 → Phase 2 → Phase 3, each producing one file under `docs/{bc}/`. BCs can interleave; the spec is explicit that this enables incremental delivery.
+
+Phase 4 is orthogonal — it reviews any artifact at any time using five health checklists.
+
+`arch-state.md` (in user projects, generated from the template here) is the persistent memory: progress, current focus BC/phase, and a `learnings` section fed by three sources (session preferences, Phase 4 ⚠️/❌ findings, `/arch-learn` commands). Before entering a phase, learnings must be read and applied silently — not quoted back.
+
+## When Working in This Repo
+
+- Do not introduce build tooling, package files, or tests "for completeness" — the skill is content, and tooling adds maintenance cost without benefit.
+- Do not auto-translate the verbatim Chinese strings (the `「...」` blocks). They are UX copy.
+- When changing one phase file, scan the others for cross-references (terminology, file paths, decision rules) — the four phase files share a tightly coupled vocabulary.
+- The README.md describes the skill to external readers; SKILL.md instructs Claude. Keep them consistent on capabilities and non-goals (especially the "What It Is Not" list — the explicit non-goals are part of the product).

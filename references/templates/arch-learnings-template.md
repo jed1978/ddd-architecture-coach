@@ -1,0 +1,72 @@
+# Architecture Learnings
+
+> This file is **append-only**. The DDD Architecture Coach writes here from three sources:
+>
+> - `session`: preferences corrected 3+ times in current session, user agreed to record as **project-scoped** (class A; cross-project preferences go to Claude Code memory instead)
+> - `phase_4`: auto-written from Phase 4 Review ⚠️/❌ findings (class C)
+> - `user_triggered`: user executes `/arch-learn <content>` (class D)
+>
+> Conflict priority (per SKILL.md → Memory / State / Learnings):
+> personal Claude Code memory < `arch-state.md` progress facts < this file's learnings
+>
+> Before entering any phase, the coach reads this file alongside `arch-state.md`. Relevant entries are folded into guidance — applied, not quoted back.
+
+---
+
+## Learnings
+
+```yaml
+learnings:
+  # - source: session | phase_4 | user_triggered
+  #   date:                # ISO date, e.g., 2026-04-30
+  #   content:             # one-paragraph statement of the rule + reason
+  #   applies_to:          # all | phase_1 | phase_2 | phase_3 | phase_4 | specific_bc:<n>
+  #   priority:            # P0 | P1 | P2  (only required for source: phase_4)
+
+# Examples:
+# - source: phase_4
+#   date: 2026-04-15
+#   content: Session BC missed the CategoryRule aggregate in the fallback path. Future Phase 1 must run at least 1 happy + 1 exception scenario per main path.
+#   applies_to: phase_1
+#   priority: P1
+#
+# - source: session
+#   date: 2026-04-18
+#   content: User prefers short tables; avoid lists over 10 rows. (Project-scoped — cross-project preference would live in Claude Code memory.)
+#   applies_to: all
+#
+# - source: user_triggered
+#   date: 2026-04-20
+#   content: BudgetEngine in this project is always synchronous, not async event (performance + consistency requirement).
+#   applies_to: specific_bc:Budget
+```
+
+---
+
+## Open Questions (cross-phase)
+
+Lingering questions that don't belong to a single phase but influence architecture decisions.
+
+```yaml
+open_questions:
+  # - raised_in_phase:    # phase_1 | phase_2 | phase_3:<bc> | phase_4
+  #   date:
+  #   question:
+  #   status:             # open | needs_clarification | resolved | obsolete
+  #   resolution:         # if resolved, write the conclusion
+  #   resolved_at:        # ISO date, only when status: resolved
+```
+
+---
+
+## Resolved Questions Archive (optional)
+
+Questions whose resolution is recorded above can be moved here once their referencing phase artifacts have shipped.
+
+```yaml
+resolved_archive:
+  # - question:
+  #   resolution:
+  #   raised_in_phase:
+  #   resolved_at:
+```
