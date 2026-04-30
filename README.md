@@ -45,11 +45,12 @@
 ```
 ddd-architecture-coach/
 ├── SKILL.md                              # 主指令
-└── references/
-    ├── phase1-domain-discovery.md         # 情境建模 + Event/Command 萃取
-    ├── phase2-architecture-design.md      # Context Map + BC 決策 + 部署
-    ├── phase3-implementation-spec.md      # Aggregate 設計 + SBE + 測試規格
-    ├── phase4-review-iterate.md           # 健康度檢查
+├── references/                            # coach 自己讀的方法論文件
+│   ├── phase1-domain-discovery.md         # 情境建模 + Event/Command 萃取
+│   ├── phase2-architecture-design.md      # Context Map + BC 決策 + 部署
+│   ├── phase3-implementation-spec.md      # Aggregate 設計 + SBE + 測試規格
+│   └── phase4-review-iterate.md           # 健康度檢查
+└── assets/                                # Bootstrap 複製到使用者專案的範本
     ├── agents/
     │   └── bc-developer.md                # TDD subagent（stack-agnostic、model 可配置）
     ├── commands/
@@ -62,7 +63,7 @@ ddd-architecture-coach/
         └── arch-learnings-template.md     # coach 維護：learnings + open questions（append-only）
 ```
 
-Bootstrap（coach 的首次執行流程）會把 `commands/`、`agents/`、`templates/` 複製到你專案的 `.claude/` 目錄。
+`references/` 是 coach 內部讀的方法論文件；`assets/` 內所有檔案會在 Bootstrap 時複製到你專案的 `.claude/` 目錄。
 
 ## 專案輸出結構
 

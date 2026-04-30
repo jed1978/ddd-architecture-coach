@@ -62,12 +62,12 @@ Then ask, in one message (do not interrogate one-by-one):
 
 收齊四項後：
 
-- 把 `references/templates/project-context-template.md` 複製到 `.claude/project-context.md`
+- 把 `assets/templates/project-context-template.md` 複製到 `.claude/project-context.md`
 - 用使用者回答**直接填入** `project_description` / `tech_stack` / `team_size` / `coach_output_root`（沒指定就用預設 `docs/ddd/`），其餘欄位（budget_sensitivity、timeline、existing_decisions、domain_constraints）填合理預設或標 TBD
-- 把 `references/templates/arch-state-template.md` 複製到 `.claude/arch-state.md`
-- 把 `references/templates/arch-learnings-template.md` 複製到 `.claude/arch-learnings.md`
-- 把 `references/agents/bc-developer.md` 複製到 `.claude/agents/`
-- 把 `references/commands/` 下的所有 `.md` 複製到 `.claude/commands/`
+- 把 `assets/templates/arch-state-template.md` 複製到 `.claude/arch-state.md`
+- 把 `assets/templates/arch-learnings-template.md` 複製到 `.claude/arch-learnings.md`
+- 把 `assets/agents/bc-developer.md` 複製到 `.claude/agents/`
+- 把 `assets/commands/` 下的所有 `.md` 複製到 `.claude/commands/`
 - 在 `coach_output_root` 指定的位置建立空目錄（mkdir -p）
 - 顯示填好的 `project-context.md` 草稿並問：「以下是我依你的回答產生的草稿。**有哪幾欄你想改？**」
 
@@ -302,7 +302,7 @@ There are three distinct stores. Do not mix them:
 
 ## Slash Commands
 
-This skill ships command templates at `references/commands/`. Bootstrap copies them to `.claude/commands/`:
+This skill ships command templates at `assets/commands/`. Bootstrap copies them to `.claude/commands/`:
 
 - `/arch-coach` — launch the coach, read state, continue from current phase
 - `/phase-1` `/phase-2` `/phase-3` `/phase-4` — force entry into the corresponding phase (Phase 3 requires BC name as argument)

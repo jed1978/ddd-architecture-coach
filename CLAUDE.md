@@ -8,7 +8,7 @@ This repo is a **Claude Code skill**, not a software project. There is no build,
 
 - `SKILL.md` is the entry point loaded by Claude Code when the skill activates. Its YAML frontmatter (`name`, `description`) controls when the skill triggers — edits there change activation behaviour, not just docs.
 - `references/phase{1..4}-*.md` hold the detailed methods/formats for each phase. SKILL.md deliberately defers to them; phase work must `Read` the relevant reference rather than rely on memory.
-- `references/templates/*.md` are copied verbatim into a user's `.claude/` directory at bootstrap. `references/agents/bc-developer.md` is copied to `.claude/agents/`. Treat them as user-facing assets, not internal docs.
+- `assets/templates/*.md` and `assets/commands/*.md` are copied verbatim into a user's `.claude/` directory at bootstrap. `assets/agents/bc-developer.md` is copied to `.claude/agents/`. Treat everything under `assets/` as user-facing — not internal coach docs (those live in `references/`).
 
 Most files are `chmod 444` (read-only) on disk. If an edit is needed, `chmod u+w` first; the read-only bit signals "stable surface, change deliberately."
 

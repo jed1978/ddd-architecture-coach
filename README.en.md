@@ -44,11 +44,12 @@ Output is organized in a BC-centric file structure. Each BC independently progre
 ```
 ddd-architecture-coach/
 ├── SKILL.md                              # Master instruction
-└── references/
-    ├── phase1-domain-discovery.md         # Scenario Modeling + Event/Command Extraction
-    ├── phase2-architecture-design.md      # Context Map + BC decisions + deployment
-    ├── phase3-implementation-spec.md      # Aggregate design + SBE + test specs
-    ├── phase4-review-iterate.md           # Health checklists
+├── references/                            # Methodology docs the coach reads itself
+│   ├── phase1-domain-discovery.md         # Scenario Modeling + Event/Command Extraction
+│   ├── phase2-architecture-design.md      # Context Map + BC decisions + deployment
+│   ├── phase3-implementation-spec.md      # Aggregate design + SBE + test specs
+│   └── phase4-review-iterate.md           # Health checklists
+└── assets/                                # Bundled templates Bootstrap copies into your project
     ├── agents/
     │   └── bc-developer.md                # TDD subagent (stack-agnostic, model configurable)
     ├── commands/
@@ -61,7 +62,7 @@ ddd-architecture-coach/
         └── arch-learnings-template.md     # Coach maintains: learnings + open questions (append-only)
 ```
 
-Bootstrap (the coach's first-run handler) copies `commands/`, `agents/`, and `templates/` into your project's `.claude/` directory.
+`references/` holds the methodology docs the coach reads internally; `assets/` holds the bundled files that Bootstrap copies into your project's `.claude/` directory on first run.
 
 ## Project Output Structure
 
