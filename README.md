@@ -81,9 +81,56 @@ coach 在 BC-centric layout 下產出 artifacts，全部放在 `coach_output_roo
 
 > 此 skill 只寫入檔案系統。團隊使用 Confluence / Notion / wiki 需自行同步。
 
+## 安裝
+
+本 skill 遵循 [Agent Skills 開放規格](https://agentskills.io/specification)，與 Claude Code、OpenAI Codex CLI、以及任何相容客戶端可用。
+
+### Claude Code
+
+選一種範圍安裝：
+
+**個人（跨所有專案）**：
+```bash
+mkdir -p ~/.claude/skills
+cd ~/.claude/skills
+git clone https://github.com/jed1978/ddd-architecture-coach.git
+```
+
+**單一專案（只在該專案啟用）**：
+```bash
+mkdir -p .claude/skills
+cd .claude/skills
+git clone https://github.com/jed1978/ddd-architecture-coach.git
+```
+
+安裝後 Claude Code 在下次啟動時自動載入。
+
+### OpenAI Codex CLI
+
+```bash
+mkdir -p ~/.codex/skills
+cd ~/.codex/skills
+git clone https://github.com/jed1978/ddd-architecture-coach.git
+```
+
+### 其他相容客戶端
+
+skill 資料夾須命名為 `ddd-architecture-coach`（與 SKILL.md `name` 欄位一致）。將整個資料夾放入該客戶端的 skills 載入路徑（依各客戶端文件而定）。
+
+### 驗證安裝
+
+開新對話、執行 `/arch-coach` 或直接向 Claude 描述你的專案。Claude 會偵測 skill 並啟動 Bootstrap 流程（問四個短問題）。
+
+### 升級
+
+```bash
+cd <安裝路徑>/ddd-architecture-coach
+git pull
+```
+
 ## 開始使用
 
-1. 在 Claude Code 專案中安裝這個 skill
+1. 在 Claude Code 專案中安裝這個 skill（見上方）
 2. 執行 `/arch-coach`（或直接向 Claude 描述專案）
 3. **Bootstrap 是對話式的**：Claude 問四個短問題（一句話描述產品、主要 tech stack、團隊規模、輸出根目錄 `coach_output_root`），然後產出 `.claude/project-context.md` 草稿讓你校正 — 不需從零填 YAML
 4. Bootstrap 同時複製 `arch-state.md`、`arch-learnings.md`、bc-developer agent、slash command 檔到 `.claude/`

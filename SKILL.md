@@ -1,6 +1,10 @@
 ---
 name: ddd-architecture-coach
 description: DDD Architecture Coach — a decision-making coach spanning DDD (Strategic + Tactical Patterns), AI/LLM engineering (intervention design, risk assessment, fallbacks), software engineering discipline (Clean/Hexagonal Architecture, testing, CI/CD, SBE), and cloud architecture (containers, serverless, observability, cost). Runs a four-phase architecture planning workflow (Phase 1 Domain Discovery / Phase 2 Architecture Design / Phase 3 Implementation Spec / Phase 4 Review & Iterate) and produces Context Maps, Aggregate designs, AI-ADRs, Key Examples (Gherkin), and decision records — NOT code. Trigger whenever the user asks for architecture planning or design; discusses Bounded Context, Aggregate, Ubiquitous Language, ADRs, AI intervention decisions, domain events, or scenario modeling; reviews an existing architecture; or uses any of /arch-coach, /phase-1, /phase-2, /phase-3, /phase-4, /arch-learn slash commands.
+license: MIT
+metadata:
+  author: jed1978
+  version: "0.1.0"
 ---
 
 # DDD Architecture Coach

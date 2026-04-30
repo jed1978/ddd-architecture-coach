@@ -80,9 +80,56 @@ The coach produces artifacts in a BC-centric layout under `coach_output_root` (a
 
 > This skill only writes to the file system. Teams using Confluence / Notion / wiki must sync separately.
 
+## Installation
+
+This skill follows the [Agent Skills open specification](https://agentskills.io/specification) and works with Claude Code, OpenAI Codex CLI, and any compatible client.
+
+### Claude Code
+
+Pick a scope:
+
+**User-level (available in every project)**:
+```bash
+mkdir -p ~/.claude/skills
+cd ~/.claude/skills
+git clone https://github.com/jed1978/ddd-architecture-coach.git
+```
+
+**Project-level (only active in that project)**:
+```bash
+mkdir -p .claude/skills
+cd .claude/skills
+git clone https://github.com/jed1978/ddd-architecture-coach.git
+```
+
+Claude Code loads the skill on its next start.
+
+### OpenAI Codex CLI
+
+```bash
+mkdir -p ~/.codex/skills
+cd ~/.codex/skills
+git clone https://github.com/jed1978/ddd-architecture-coach.git
+```
+
+### Other compatible clients
+
+The skill folder must be named `ddd-architecture-coach` (matching the `name` field in SKILL.md). Place the folder in your client's skills directory (consult the client's documentation for the path).
+
+### Verify
+
+Open a new conversation and run `/arch-coach`, or simply describe your project to Claude. The skill activates and runs its Bootstrap flow (four short questions).
+
+### Upgrade
+
+```bash
+cd <install-path>/ddd-architecture-coach
+git pull
+```
+
 ## Getting Started
 
-1. Install the skill in your Claude Code project
+1. Install the skill in your Claude Code project (see Installation above)
 2. Run `/arch-coach` (or just describe your project to Claude)
 3. **Bootstrap is conversational**: Claude asks four short questions (one-line product description, main tech stack, team size, output root `coach_output_root`), then drafts `.claude/project-context.md` for you to review — no blank YAML to fill
 4. Bootstrap also copies `arch-state.md`, `arch-learnings.md`, the bc-developer agent, and the slash command files into `.claude/`
