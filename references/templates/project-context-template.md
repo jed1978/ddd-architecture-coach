@@ -23,6 +23,16 @@ Your description:
 
 ---
 
+## Coach Output Root (required; set during Bootstrap)
+
+Where the DDD Architecture Coach writes its outputs (discovery / decisions / spec for every BC). Default `docs/ddd/`. Common alternatives: `docs/architecture/` (mixed with general architecture docs), `docs/` (no existing docs folder), `packages/<name>/docs/ddd/` (monorepo sub-package). Use a relative path from your project root; trailing slash optional.
+
+```yaml
+coach_output_root: docs/ddd/
+```
+
+---
+
 ## Tech Stack (required; mark unresolved fields as TBD)
 
 ```yaml

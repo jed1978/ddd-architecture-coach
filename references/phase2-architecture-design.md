@@ -7,8 +7,10 @@ Translate Phase 1's Bounded Contexts and Domain Events into an architecture-leve
 Wrong architecture decisions here propagate to every BC's Phase 3 spec — this phase has the highest leverage per decision.
 
 Phase 2 has two output scopes:
-- **System-level**: Context Map (BC relationships) + deployment blueprint → append to `docs/system/context-map.md`
-- **Per-BC**: architecture decisions + AI-ADRs → `docs/{bc}/decisions.md`
+- **System-level**: Context Map (BC relationships) + deployment blueprint → append to `{coach_output_root}/system/context-map.md`
+- **Per-BC**: architecture decisions + AI-ADRs → `{coach_output_root}/{bc}/decisions.md`
+
+> Resolve `{coach_output_root}` from `.claude/project-context.md` (default `docs/ddd/`).
 
 System-level sections are produced once (updated incrementally when new BCs are added). Per-BC sections can be produced as each BC reaches Phase 2.
 
@@ -599,13 +601,13 @@ If sync audit fails, fix Phase 1 first (or document Phase 2's deviation with rat
 When Phase 2 system-level reaches stable v1.x, write to `arch-state.md`:
 
 - `phase_2_system.status`: completed
-- `phase_2_system.output_doc`: `docs/system/context-map.md`
+- `phase_2_system.output_doc`: `{coach_output_root}/system/context-map.md`
 - `phase_2_system.deployment_decision`: Modular Monolith / Microservices / etc.
 
 When Phase 2 per-BC reaches stable, write to `arch-state.md`:
 
 - `phase_2_bc.{bc}.status`: completed
-- `phase_2_bc.{bc}.output_doc`: `docs/{bc}/decisions.md`
+- `phase_2_bc.{bc}.output_doc`: `{coach_output_root}/{bc}/decisions.md`
 - `phase_2_bc.{bc}.decisions_count`
 - `phase_2_bc.{bc}.ai_adrs`: active ADRs + rejection count
 

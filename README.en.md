@@ -65,24 +65,26 @@ Bootstrap (the coach's first-run handler) copies `commands/`, `agents/`, and `te
 
 ## Project Output Structure
 
-The coach produces artifacts in a BC-centric layout:
+The coach produces artifacts in a BC-centric layout under `coach_output_root` (asked during the first Bootstrap; default `docs/ddd/`; can be changed to `docs/architecture/`, `docs/`, `packages/foo/docs/ddd/`, etc.):
 
 ```
-docs/
+{coach_output_root}/
   system/
     domain-stories.md          # Scenarios + event/command timeline (cross-BC)
     context-map.md             # BC classification, relationships, deployment
   {bc}/
     discovery.md               # BC-local events, User Stories, UL, AI opportunities
     decisions.md               # Architecture decisions, AI-ADRs
-    spec.md                    # Implementation specification
+    spec.md                    # Implementation specification (canonical contract for bc-developer)
 ```
+
+> This skill only writes to the file system. Teams using Confluence / Notion / wiki must sync separately.
 
 ## Getting Started
 
 1. Install the skill in your Claude Code project
 2. Run `/arch-coach` (or just describe your project to Claude)
-3. **Bootstrap is conversational**: Claude asks three short questions (one-line product description, main tech stack, team size), then drafts `.claude/project-context.md` for you to review — no blank YAML to fill
+3. **Bootstrap is conversational**: Claude asks four short questions (one-line product description, main tech stack, team size, output root `coach_output_root`), then drafts `.claude/project-context.md` for you to review — no blank YAML to fill
 4. Bootstrap also copies `arch-state.md`, `arch-learnings.md`, the bc-developer agent, and the slash command files into `.claude/`
 5. Claude asks which model the bc-developer subagent should use (default Sonnet 4.6; Haiku 4.5 for fast routine TDD; Opus 4.7 for deep reasoning)
 6. Phase 1 starts: you describe behaviors, Claude produces the initial domain model — you review and challenge, never fill from scratch

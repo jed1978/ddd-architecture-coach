@@ -6,6 +6,8 @@
 >
 > Users may edit manually but should preserve the `last_updated` field.
 > Format: YAML-in-Markdown. Overwriting fields here is normal — this file represents the current snapshot.
+>
+> Paths use the placeholder `{coach_output_root}` — when reading or writing, the coach resolves it from `project-context.md`. The default is `docs/ddd/`.
 
 ---
 
@@ -28,8 +30,8 @@ current_focus_phase:     # phase_1 | phase_2 | phase_3 | phase_4
 phase_1_system:
   status: not_started      # not_started | in_progress | completed
   output_docs:
-    domain_stories: docs/system/domain-stories.md
-    context_map: docs/system/context-map.md   # classification section
+    domain_stories: "{coach_output_root}/system/domain-stories.md"
+    context_map: "{coach_output_root}/system/context-map.md"   # classification section
 
   summary:
     bc_count:
@@ -45,7 +47,7 @@ phase_1_system:
 phase_1_bc:
   # session:
   #   status: not_started  # not_started | in_progress | completed
-  #   output_doc: docs/session/discovery.md
+  #   output_doc: "{coach_output_root}/session/discovery.md"
   #   user_stories_count:
   #   ai_intervention_points:
 ```
@@ -61,7 +63,7 @@ phase_1_bc:
 ```yaml
 phase_2_system:
   status: not_started
-  output_doc: docs/system/context-map.md     # relationships + deployment sections
+  output_doc: "{coach_output_root}/system/context-map.md"     # relationships + deployment sections
 
   context_map:
     relationships:
@@ -88,7 +90,7 @@ phase_2_system:
 phase_2_bc:
   # session:
   #   status: not_started
-  #   output_doc: docs/session/decisions.md
+  #   output_doc: "{coach_output_root}/session/decisions.md"
   #   architecture_style:
   #   persistence:
   #   ai_components:
@@ -113,7 +115,7 @@ in_progress_bcs: []
 
 output_docs:
   # - bc:
-  #   path:              # e.g., docs/session/spec.md
+  #   path:              # e.g., "{coach_output_root}/session/spec.md"
 
 per_bc_spec_summary:
   # - bc:

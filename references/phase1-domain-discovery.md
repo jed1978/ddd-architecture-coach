@@ -5,8 +5,10 @@
 From the user's product/project description, produce initial Bounded Context boundaries, Domain Events, Commands, Policies, Ubiquitous Language, User Stories, and AI intervention opportunities.
 
 Phase 1 has two scopes:
-- **System-level (Steps 1-4)**: scenarios, event/command timeline, BC delineation, classification → output to `docs/system/`
-- **Per-BC (Steps 5-6)**: AI opportunities, User Stories, BC-local UL → output to `docs/{bc}/discovery.md`
+- **System-level (Steps 1-4)**: scenarios, event/command timeline, BC delineation, classification → output to `{coach_output_root}/system/`
+- **Per-BC (Steps 5-6)**: AI opportunities, User Stories, BC-local UL → output to `{coach_output_root}/{bc}/discovery.md`
+
+> Resolve `{coach_output_root}` from `.claude/project-context.md` (default `docs/ddd/`) before writing.
 
 System-level runs once per project. Per-BC runs once per BC and can be done incrementally as new BCs are identified.
 
@@ -33,7 +35,7 @@ Read `arch-state.md` to determine execution mode:
 | Mode | Trigger | Scope |
 |------|---------|-------|
 | **system-full** | New project (no system-level output exists) | Run Steps 1-4, then per-BC Steps 5-6 for the first BC |
-| **system-incremental** | New BC added to existing project | Update `docs/system/domain-stories.md` with new scenarios/events if needed; skip to per-BC Steps 5-6 |
+| **system-incremental** | New BC added to existing project | Update `{coach_output_root}/system/domain-stories.md` with new scenarios/events if needed; skip to per-BC Steps 5-6 |
 | **per-bc** | System-level complete, starting a new BC | Run Steps 5-6 only; reuse existing UL; do not rebuild system-level artifacts |
 
 Before entering the steps, tell the user which mode and why.
@@ -298,7 +300,7 @@ If you notice a problem that is better addressed in a later step (e.g., while wr
 When `arch-state.md` already has system-level output and the user is adding a new BC:
 
 1. **Read existing UL first**: new BC and Aggregate names must be compatible; flag conflicts explicitly
-2. **System-level update**: if new BC introduces new scenarios or events, append to `docs/system/domain-stories.md`; do not rewrite existing content
+2. **System-level update**: if new BC introduces new scenarios or events, append to `{coach_output_root}/system/domain-stories.md`; do not rewrite existing content
 3. **Event extraction focus**: extract only events produced by the new BC; mark integration points with existing BCs using the `IntegrationEvent` suffix
 4. **BC delineation**: add-only; do not modify existing BC boundaries unless the user explicitly requests it
 5. **Learnings check**: read `arch-learnings.md` for pitfalls prior BCs hit; proactively avoid them
@@ -310,13 +312,13 @@ When `arch-state.md` already has system-level output and the user is adding a ne
 At the end of Phase 1 system-level (Steps 1-4), write to `arch-state.md`:
 
 - `phase_1_system.status: completed`
-- `phase_1_system.output_docs`: `docs/system/domain-stories.md`, `docs/system/context-map.md` (classification section)
+- `phase_1_system.output_docs`: `{coach_output_root}/system/domain-stories.md`, `{coach_output_root}/system/context-map.md` (classification section)
 - `bc_count`, `bc_names`, `core_domains`, `supporting_domains`, `generic_domains`
 
 At the end of Phase 1 per-BC (Steps 5-6), write per BC to `arch-state.md`:
 
 - `phase_1_bc.{bc}.status: completed`
-- `phase_1_bc.{bc}.output_doc`: `docs/{bc}/discovery.md`
+- `phase_1_bc.{bc}.output_doc`: `{coach_output_root}/{bc}/discovery.md`
 - `phase_1_bc.{bc}.user_stories_count`
 - `phase_1_bc.{bc}.ai_intervention_points`
 

@@ -66,24 +66,26 @@ Bootstrap（coach 的首次執行流程）會把 `commands/`、`agents/`、`temp
 
 ## 專案輸出結構
 
-coach 在 BC-centric layout 下產出 artifacts：
+coach 在 BC-centric layout 下產出 artifacts，全部放在 `coach_output_root` 之下（Bootstrap 第一次互動時詢問，預設 `docs/ddd/`，可改為 `docs/architecture/`、`docs/`、`packages/foo/docs/ddd/` 等）：
 
 ```
-docs/
+{coach_output_root}/
   system/
     domain-stories.md          # 情境 + event/command timeline（跨 BC）
     context-map.md             # BC 分類、關係、部署
   {bc}/
     discovery.md               # BC-local events、User Stories、UL、AI 機會
     decisions.md               # 架構決策、AI-ADRs
-    spec.md                    # 實作規格
+    spec.md                    # 實作規格（bc-developer 直接讀的 contract）
 ```
+
+> 此 skill 只寫入檔案系統。團隊使用 Confluence / Notion / wiki 需自行同步。
 
 ## 開始使用
 
 1. 在 Claude Code 專案中安裝這個 skill
 2. 執行 `/arch-coach`（或直接向 Claude 描述專案）
-3. **Bootstrap 是對話式的**：Claude 問三個短問題（一句話描述產品、主要 tech stack、團隊規模），然後產出 `.claude/project-context.md` 草稿讓你校正 — 不需從零填 YAML
+3. **Bootstrap 是對話式的**：Claude 問四個短問題（一句話描述產品、主要 tech stack、團隊規模、輸出根目錄 `coach_output_root`），然後產出 `.claude/project-context.md` 草稿讓你校正 — 不需從零填 YAML
 4. Bootstrap 同時複製 `arch-state.md`、`arch-learnings.md`、bc-developer agent、slash command 檔到 `.claude/`
 5. Claude 詢問 bc-developer 子 agent 要用哪個 model（預設 Sonnet 4.6；Haiku 4.5 適合快速 routine TDD；Opus 4.7 適合深度推理）
 6. Phase 1 開始：你描述行為，Claude 產出初版 domain model — 你 review 與挑戰，不從零填寫

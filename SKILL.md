@@ -54,15 +54,17 @@ Then ask, in one message (do not interrogate one-by-one):
 1. **一句話描述產品**（who 是顧客、what 是核心價值、有什麼特殊條件如多租戶 / AI / 嚴格合規）
 2. **主要 tech stack**（後端語言+框架、資料庫、雲端供應商；不確定的部分寫 TBD 即可）
 3. **團隊規模**（1 / 2-5 / 6-15 / 16+）
+4. **coach 的輸出文件要放哪？**（discovery / decisions / spec 都會放在這個根目錄下）。預設 `docs/ddd/`。常見替代：`docs/architecture/`、`docs/`（若無既有 docs）、`packages/foo/docs/ddd/`（monorepo 子 package）。回 `預設` 即可。
 
-收齊三項後：
+收齊四項後：
 
 - 把 `references/templates/project-context-template.md` 複製到 `.claude/project-context.md`
-- 用使用者回答**直接填入** `project_description` / `tech_stack` / `team_size`，其餘欄位（budget_sensitivity、timeline、existing_decisions、domain_constraints）填合理預設或標 TBD
+- 用使用者回答**直接填入** `project_description` / `tech_stack` / `team_size` / `coach_output_root`（沒指定就用預設 `docs/ddd/`），其餘欄位（budget_sensitivity、timeline、existing_decisions、domain_constraints）填合理預設或標 TBD
 - 把 `references/templates/arch-state-template.md` 複製到 `.claude/arch-state.md`
 - 把 `references/templates/arch-learnings-template.md` 複製到 `.claude/arch-learnings.md`
 - 把 `references/agents/bc-developer.md` 複製到 `.claude/agents/`
 - 把 `references/commands/` 下的所有 `.md` 複製到 `.claude/commands/`
+- 在 `coach_output_root` 指定的位置建立空目錄（mkdir -p）
 - 顯示填好的 `project-context.md` 草稿並問：「以下是我依你的回答產生的草稿。**有哪幾欄你想改？**」
 
 #### bc-developer model selection
@@ -184,20 +186,22 @@ When explanation mode is OFF, skip rule-citation commentary.
 
 ## File Structure
 
-All architecture artifacts are organized in a BC-centric structure:
+All coach outputs (architecture docs + implementation specs) are organized in a BC-centric structure under `{coach_output_root}`. The variable is set in `.claude/project-context.md` during Bootstrap (default: `docs/ddd/`). Whenever this skill mentions a path starting with `{coach_output_root}/`, resolve the variable from `project-context.md` before reading or writing.
 
 ```
-docs/
+{coach_output_root}/
   system/
     domain-stories.md              ← Phase 1 Step 1-2: scenarios + event/command timeline (cross-BC)
     context-map.md                 ← Phase 1 Step 4 + Phase 2: BC classification, relationships, deployment
   {bc}/
     discovery.md                   ← Phase 1 Step 3,5,6: BC-local events, aggregates, AI opportunities, User Stories, UL
     decisions.md                   ← Phase 2: BC-internal architecture decisions, AI-ADRs
-    spec.md                        ← Phase 3: full implementation spec
+    spec.md                        ← Phase 3: implementation specification (canonical contract for bc-developer)
 ```
 
 System-level files are created once and updated incrementally. Per-BC files are created when that BC enters its first phase.
+
+**Note**: this skill writes only to the file system. Teams using Confluence / Notion / wikis must sync these files into their external system separately.
 
 ---
 
@@ -213,7 +217,7 @@ Phase 1 Step 1-2 (Scenario Modeling + Event & Command Extraction)
   → Phase 1 Step 4 (Core / Supporting / Generic Classification)
 ```
 
-These produce `docs/system/domain-stories.md` and the classification section of `docs/system/context-map.md`.
+These produce `{coach_output_root}/system/domain-stories.md` and the classification section of `{coach_output_root}/system/context-map.md`.
 
 **Per-BC flow (run per BC, can interleave across BCs):**
 
@@ -223,7 +227,7 @@ Phase 1 Step 5-6 (AI Opportunities + User Stories for this BC)
   → Phase 3 (Implementation spec for this BC)
 ```
 
-These produce `docs/{bc}/discovery.md`, `docs/{bc}/decisions.md`, `docs/{bc}/spec.md`.
+These produce `{coach_output_root}/{bc}/discovery.md`, `{coach_output_root}/{bc}/decisions.md`, `{coach_output_root}/{bc}/spec.md`.
 
 **Phase 4** can review any artifact at any time.
 

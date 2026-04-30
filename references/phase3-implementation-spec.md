@@ -1246,7 +1246,7 @@ When this BC's Phase 3 reaches v1.x stable (no more spec-structure changes expec
 
 - `status`: `spec_v{n}_ready_for_mvp1` for this BC
 - Add to `completed_bcs` (if MVP1+ shipped) or `in_progress_bcs`
-- `output_doc`: `docs/{bc}/spec.md`
+- `output_doc`: `{coach_output_root}/{bc}/spec.md`
 - `per_bc_spec_summary`: aggregates + invariant counts + events emitted + repository count + integration count + test scenario count
 
 Append to `arch-learnings.md`:
