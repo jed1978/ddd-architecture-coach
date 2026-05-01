@@ -2,7 +2,7 @@
 
 > 繁體中文版：[README.md](README.md)
 
-A Claude Code skill that helps you make architecture decisions for DDD projects. It produces design documents and decision records — not code.
+A Claude Code skill that helps you make architecture decisions for DDD projects. The core is planning — producing design documents and decision records; bundled is a bc-developer subagent you can optionally use to land implementation from the spec.
 
 ## What It Does
 
@@ -15,10 +15,45 @@ Guides you through four phases of architecture planning:
 
 Output is organized in a BC-centric file structure. Each BC independently progresses through discovery → design → spec, enabling incremental development.
 
+## Skill Components
+
+This skill ships two responsibility-separated components sharing one DDD discipline:
+
+| Component | Role | Location |
+|-----------|------|----------|
+| **Architecture Coach** (core) | Plans, drafts design docs and decisions | `SKILL.md` + `references/` |
+| **bc-developer subagent** | Lands the spec as code while enforcing DDD discipline | `assets/agents/bc-developer.md` (copied to `.claude/agents/` at Bootstrap) |
+
+The hand-off contract is `{coach_output_root}/{bc}/spec.md`: the coach embeds DDD discipline into the spec in Phase 3 (Aggregate boundaries, UL, Invariants, Key Examples, cross-BC event communication…), and **bc-developer reads the spec and ensures that discipline actually lives in the code** — enforced layered architecture (Domain Layer with zero external dependencies), Aggregate-centric vertical slices, UL-driven naming, cross-BC communication only via Domain Events, tenant isolation, three-color SBE coverage, commit granularity of one Invariant per TDD cycle, and halt-and-report on spec ambiguity rather than guessing.
+
+It is not merely a "TDD subagent" — TDD is its workflow, but landing DDD discipline is its responsibility.
+
+You can skip bc-developer and hand the spec to your human team or other tools — the coach doesn't depend on a specific downstream — but skipping it means giving up this enforcement layer.
+
+### If You Don't Want bc-developer
+
+bc-developer is a passive subagent — it doesn't run unless invoked; sitting in `.claude/agents/` has no side effect. To remove it entirely: `rm .claude/agents/bc-developer.md`.
+
+Without bc-developer, here are the artifacts you can hand to your downstream of choice:
+
+| Artifact | Purpose | Location |
+|----------|---------|----------|
+| `{coach_output_root}/{bc}/spec.md` | Canonical Phase 3 spec (Aggregates, Invariants, Key Examples, Ports…) | e.g. `docs/ddd/{bc}/spec.md` |
+| `.claude/rules/{bc}.md` | Rules card: UL + Aggregate top level + firewall + dispatch summary | `.claude/rules/{bc}.md` |
+| `CLAUDE.md` | Project tech-stack rules | repo root |
+
+Three downstream paths:
+
+1. **Hand to a human team** — read spec + rules card; DDD discipline enforced via code review
+2. **Feed to another code agent** (Cursor / Copilot / a Claude Code instance without this skill) — `spec.md` is stack-agnostic and works directly as prompt context
+3. **Use `assets/agents/bc-developer.md` as a checklist** (read its Constraints section, don't invoke) — apply the DDD discipline manually or through your own workflow
+
+Trade-off: DDD discipline becomes your responsibility. None of these paths give you automated spec-ambiguity halts or three-color SBE enforcement. Reading bc-developer.md as a checklist is a low-cost compensator.
+
 ## What It Is Not
 
-- **Not a code generator.** Implementation is handled by Claude Code (or your team) based on the specs this skill produces.
-- **Not a Domain Storytelling or Event Storming workshop.** Phase 1 borrows vocabulary and formats from DS and ES, but Claude drafting artifacts is fundamentally different from a facilitated workshop with domain experts. The skill is honest about this distinction.
+- **The coach itself doesn't write code.** SKILL.md and the four-phase workflow only produce design documents and decision records. The bundled **bc-developer** subagent (or your own workflow) takes implementation responsibility, reading the Phase 3 `spec.md` and writing code while enforcing DDD discipline. The coach and bc-developer are joined by `spec.md` — separated by responsibility, unified by discipline.
+- **Not a Domain Storytelling or Event Storming workshop.** Phase 1 borrows vocabulary and formats from DS and ES, but Claude drafting artifacts is fundamentally different from a facilitated workshop with domain experts.
 - **Not a replacement for team discussion.** Key Examples produced by the coach are labeled as AI-drafted baselines. Final sign-off should involve cross-functional review.
 
 ## Who It's For
@@ -51,7 +86,7 @@ ddd-architecture-coach/
 │   └── phase4-review-iterate.md           # Health checklists
 └── assets/                                # Bundled templates Bootstrap copies into your project
     ├── agents/
-    │   └── bc-developer.md                # TDD subagent (stack-agnostic, model configurable)
+    │   └── bc-developer.md                # DDD discipline enforcer subagent (TDD workflow, stack-agnostic, model configurable)
     ├── commands/
     │   ├── arch-coach.md                  # Default entry; reads state, picks phase
     │   ├── phase-1.md ... phase-4.md      # Force entry into a specific phase
@@ -78,6 +113,16 @@ The coach produces artifacts in a BC-centric layout under `coach_output_root` (a
     decisions.md               # Architecture decisions, AI-ADRs
     spec.md                    # Implementation specification (canonical contract for bc-developer)
 ```
+
+Additionally, once the spec stabilizes (v1.x), Phase 3 produces an implementation rules card at the project root:
+
+```
+.claude/
+  rules/
+    {bc}.md                    # UL + Aggregate top level + firewall + dispatch + DEFERRED (condensed from spec)
+```
+
+The rules card is a quick-reference of the spec for bc-developer or any other downstream consumer; on conflict, `spec.md` wins.
 
 > This skill only writes to the file system. Teams using Confluence / Notion / wiki must sync separately.
 
@@ -134,7 +179,7 @@ git pull
 2. Run `/arch-coach` (or just describe your project to Claude)
 3. **Bootstrap is conversational**: Claude asks four short questions (one-line product description, main tech stack, team size, output root `coach_output_root`), then drafts `.claude/project-context.md` for you to review — no blank YAML to fill
 4. Bootstrap also copies `arch-state.md`, `arch-learnings.md`, the bc-developer agent, and the slash command files into `.claude/`
-5. Claude asks which model the bc-developer subagent should use (default Sonnet 4.6; Haiku 4.5 for fast routine TDD; Opus 4.7 for deep reasoning)
+5. Claude asks which model the **bc-developer subagent** (the spec-to-code enforcement layer; see "Skill Components" above) should use (default Sonnet 4.6; Haiku 4.5 for fast routine TDD; Opus 4.7 for deep reasoning)
 6. Phase 1 starts: you describe behaviors, Claude produces the initial domain model — you review and challenge, never fill from scratch
 
 ## Requirements

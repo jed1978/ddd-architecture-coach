@@ -2,7 +2,7 @@
 
 > English: [README.en.md](README.en.md)
 
-協助你做 DDD 專案架構決策的 Claude Code skill。它產出設計文件與決策記錄 — 不產 code。
+協助你做 DDD 專案架構決策的 Claude Code skill。主軸是規劃 — 產出設計文件與決策記錄；附帶 bc-developer subagent，可選擇用來依 spec 把實作落地。
 
 ## 它做什麼
 
@@ -15,10 +15,45 @@
 
 輸出採 BC-centric 檔案結構。每個 BC 獨立走 discovery → design → spec，支援漸進開發。
 
+## Skill 構成
+
+這個 skill 套件包含兩個職責分離、共享同一套 DDD 紀律的元件：
+
+| 元件 | 角色 | 位置 |
+|------|------|------|
+| **Architecture Coach**（本體） | 規劃、產設計文件與決策 | `SKILL.md` + `references/` |
+| **bc-developer subagent** | 把 spec 落地到 code，並守住 DDD 紀律 | `assets/agents/bc-developer.md`（Bootstrap 時複製到 `.claude/agents/`） |
+
+兩者透過 `{coach_output_root}/{bc}/spec.md` 交接：coach 在 Phase 3 把 DDD 紀律編進 spec（Aggregate 邊界、UL、Invariants、Key Examples、跨 BC event 通訊…），**bc-developer 讀 spec 後負責讓這些紀律真的長在 code 上** — 強制分層架構（Domain Layer 零外部依賴）、Aggregate-centric vertical slice、UL naming、跨 BC 只走 Domain Events、tenant isolation、SBE 三色覆蓋、commit 粒度＝一個 Invariant 一個 cycle，spec 有歧義時停下回報而非猜測。
+
+它不只是「跑 TDD 的 subagent」 — TDD 是它的工作流程，DDD 紀律落地才是它的職責。
+
+你也可以略過 bc-developer，把 spec 交給人類團隊或其他工具實作 — coach 本身不依賴特定下游，但跳過 bc-developer 等同於放棄這層紀律守門。
+
+### 不想用 bc-developer？
+
+bc-developer 是被動 subagent — 沒被 invoke 就不會跑；裝在 `.claude/agents/` 本身沒有副作用。完全清掉的方式：`rm .claude/agents/bc-developer.md`。
+
+不用 bc-developer 時，你可以接手實作的成品：
+
+| Artifact | 用途 | 位置 |
+|----------|------|------|
+| `{coach_output_root}/{bc}/spec.md` | 規範性 Phase 3 spec（Aggregates、Invariants、Key Examples、Ports…） | 例 `docs/ddd/{bc}/spec.md` |
+| `.claude/rules/{bc}.md` | UL + Aggregate 頂層 + firewall + dispatch 摘要的 rules card | `.claude/rules/{bc}.md` |
+| `CLAUDE.md` | 專案 tech stack 規則 | repo root |
+
+三種下游路徑：
+
+1. **交給人類團隊** — 讀 spec + rules card；DDD 紀律靠 review
+2. **餵給其他 code agent**（Cursor / Copilot / 沒裝這 skill 的 Claude Code）— spec.md 是 stack-agnostic，可直接作為 prompt context
+3. **把 `assets/agents/bc-developer.md` 當 checklist**（讀它的 Constraints 段，不 invoke）— 由人或自製流程套用其中的 DDD 紀律
+
+代價：DDD 紀律由人或自製流程負擔；以上三種路徑都拿不到自動的 spec-ambiguity halt 與 SBE 三色強制。把 bc-developer.md 全文當紀律 checklist 是低成本補強。
+
 ## 它不做什麼
 
-- **不產 code**。實作交給 Claude Code 或團隊，依本 skill 產出的 spec 進行
-- **不是 Domain Storytelling 或 Event Storming workshop**。Phase 1 借用 DS/ES 的詞彙與格式，但 Claude 起草 artifacts 與專家主持的工作坊本質不同 — 本 skill 對此差異保持誠實
+- **Coach 本身不產 code**。架構教練 SKILL.md 與四個 phase 流程只產出設計文件與決策記錄。實作職責由 bundle 內建的 bc-developer subagent（或你自己的開發流程）承接，依 Phase 3 的 `spec.md` 守住 DDD 紀律後寫 code。Coach 與 bc-developer 透過 `spec.md` 交接，職責分離但共用一套紀律
+- **不是 Domain Storytelling 或 Event Storming workshop**。Phase 1 借用 DS/ES 的詞彙與格式，但 Claude 起草 artifacts 與專家主持的工作坊本質不同
 - **不取代團隊討論**。coach 產出的 Key Examples 標記為 AI-drafted baseline，最終簽核需要跨職能 review
 
 ## 適用對象
@@ -52,7 +87,7 @@ ddd-architecture-coach/
 │   └── phase4-review-iterate.md           # 健康度檢查
 └── assets/                                # Bootstrap 複製到使用者專案的範本
     ├── agents/
-    │   └── bc-developer.md                # TDD subagent（stack-agnostic、model 可配置）
+    │   └── bc-developer.md                # DDD 實作守門人 subagent（TDD 工作流，stack-agnostic、model 可配置）
     ├── commands/
     │   ├── arch-coach.md                  # 預設入口；讀 state、決定 phase
     │   ├── phase-1.md ... phase-4.md      # 強制進入指定 phase
@@ -79,6 +114,16 @@ coach 在 BC-centric layout 下產出 artifacts，全部放在 `coach_output_roo
     decisions.md               # 架構決策、AI-ADRs
     spec.md                    # 實作規格（bc-developer 直接讀的 contract）
 ```
+
+另外，Phase 3 在 spec stable（v1.x）後會在專案根產出 implementation rules card：
+
+```
+.claude/
+  rules/
+    {bc}.md                    # UL + Aggregate 頂層 + firewall + dispatch + DEFERRED（從 spec 摘要）
+```
+
+rules card 是 spec 的 quick-reference，給 bc-developer 或其他下游消費者用；衝突時 spec 為準。
 
 > 此 skill 只寫入檔案系統。團隊使用 Confluence / Notion / wiki 需自行同步。
 
@@ -135,7 +180,7 @@ git pull
 2. 執行 `/arch-coach`（或直接向 Claude 描述專案）
 3. **Bootstrap 是對話式的**：Claude 問四個短問題（一句話描述產品、主要 tech stack、團隊規模、輸出根目錄 `coach_output_root`），然後產出 `.claude/project-context.md` 草稿讓你校正 — 不需從零填 YAML
 4. Bootstrap 同時複製 `arch-state.md`、`arch-learnings.md`、bc-developer agent、slash command 檔到 `.claude/`
-5. Claude 詢問 bc-developer 子 agent 要用哪個 model（預設 Sonnet 4.6；Haiku 4.5 適合快速 routine TDD；Opus 4.7 適合深度推理）
+5. Claude 詢問 **bc-developer 子 agent**（spec 落地到 code 的守門人，見上方「Skill 構成」）要用哪個 model（預設 Sonnet 4.6；Haiku 4.5 適合快速 routine TDD；Opus 4.7 適合深度推理）
 6. Phase 1 開始：你描述行為，Claude 產出初版 domain model — 你 review 與挑戰，不從零填寫
 
 ## 系統需求
