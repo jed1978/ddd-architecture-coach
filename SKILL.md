@@ -42,8 +42,14 @@ Before responding to any architecture question, run the following checks (do not
 1. Check whether `.claude/project-context.md` exists AND fields `project_description` and `tech_stack` are filled.
 2. Check whether `.claude/arch-state.md` exists.
 3. Check whether `.claude/arch-learnings.md` exists.
+4. **Legacy arch-state migration** — if `.claude/arch-state.md` exists AND contains any of the legacy keys (`phase_1_system`, `phase_2_system`, `phase_2_bc`, `phase_3.completed_bcs`, `per_bc_spec_summary`, top-level `reviews:`), migrate before continuing:
+   - Extract `current_focus_bc` / `current_focus_phase` (if present in the legacy file's `Meta` block) into the new shape under `current_focus.bc` / `current_focus.phase`. Map legacy `phase_1` etc. to the new values (e.g., `phase_1` → `phase_1_step_5_6` if a focus BC exists, otherwise `phase_1_step_1_4`).
+   - Extract any entries from the legacy `reviews:` block and append them to `.claude/arch-learnings.md` `phase_4_reviews:`, mapping fields (`phase_reviewed` → `review_scope`, `scorecard` → `scores_summary`, `critical_issues` → `critical_fixes`).
+   - Rename the legacy file to `.claude/arch-state.md.legacy` (do not delete).
+   - Write the new minimal `.claude/arch-state.md` from the slim template, populated with the extracted `current_focus` (if any) and today's `last_updated`.
+   - Tell the user: 「偵測到舊版 arch-state.md（鏡像 docs/ddd 的 status / per_bc_spec_summary 等）。已抽出 current_focus、把 reviews 搬到 arch-learnings.md 的 phase_4_reviews 區塊，原檔備份為 `.claude/arch-state.md.legacy`。Phase 進度改由 docs/ddd 推論（見 SKILL.md → State Determination）。」
 
-**All three exist and `project-context.md` is properly filled** → read them in, continue the conversation.
+**All three exist (post-migration if applicable) and `project-context.md` is properly filled** → read them in, continue the conversation.
 
 **Otherwise** → run the conversational bootstrap below. Do NOT dump empty templates and ask the user to fill them — that violates the Core Operating Principle (you produce, the user reviews).
 
@@ -235,15 +241,31 @@ These produce `{coach_output_root}/{bc}/discovery.md`, `{coach_output_root}/{bc}
 
 **Phase 4** can review any artifact at any time.
 
-**State determination** — read `arch-state.md`:
+**State determination** — phase progress is **derived from the filesystem**, not stored. `arch-state.md` only carries `current_focus` (intent — which BC, which phase the user last asked to work on). On entry:
 
-- **arch-state.md empty** → enter Phase 1 system-level (Steps 1-4)
-- **System-level complete, no BC started** → ask which BC to start; enter Phase 1 Steps 5-6 for that BC
-- **BC has discovery but no decisions** → enter Phase 2 for that BC
-- **BC has decisions but no spec** → enter Phase 3 for that BC
-- **Any artifact exists AND user requests review** → enter Phase 4
-- **User explicitly uses `/phase-N`** → enter that phase directly, ask which BC if applicable
-- **New BC added to project** → enter Phase 1 Steps 5-6 for the new BC; system-level Steps 1-2 may need incremental update (new scenarios, events)
+1. **Read intent** from `.claude/arch-state.md` → `current_focus.{bc, phase}`.
+2. **Probe artifacts** under `{coach_output_root}/`:
+   - `system_p1_done` ← `system/domain-stories.md` exists
+   - `system_p2_classification_done` ← `system/context-map.md` has the classification section
+   - `system_p2_full_done` ← `system/context-map.md` has both relationships and deployment sections
+   - For each `{bc}/` directory:
+     - `p1_done[bc]` ← `discovery.md` exists
+     - `p2_done[bc]` ← `decisions.md` exists
+     - `p3_done[bc]` ← `spec.md` exists
+     - `p3_stable[bc]` ← `spec.md` frontmatter `status: v1.x`
+3. **Pick phase** (in order):
+   - User invoked `/phase-N` → enter that phase; ask which BC if Phase 2/3/4; update `current_focus`.
+   - `current_focus` is set → cross-check against probe results. If consistent (e.g., focus is `phase_2` for `bc-a` and `decisions.md` does not yet exist) → resume there. If inconsistent (focus is `phase_2` but `bc-a/decisions.md` already exists) → flag the conflict and ask the user: 「current_focus 標 phase_2，但 decisions.md 已存在 — 要 review 既有 decisions、切到 phase_3、還是其他？」
+   - `current_focus` is empty → walk the cascade:
+     - `!system_p1_done` → Phase 1 Steps 1-4
+     - `system_p1_done && !system_p2_full_done` → ask user: continue with Phase 1 Step 5-6 for a BC, or jump to Phase 2 system-level for relationships/deployment?
+     - All system-level done, no BC dirs exist → ask which BC to start; enter Phase 1 Steps 5-6 for that BC
+     - For the most-recently-touched BC `b` (or ask the user if ambiguous):
+       - `p1_done[b] && !p2_done[b]` → Phase 2 for `b`
+       - `p2_done[b] && !p3_done[b]` → Phase 3 for `b`
+       - `p3_done[b]` → ask the user (review existing? add a new BC? move to next BC's Phase 2/3?)
+   - User requests review (and any artifact exists) → Phase 4.
+4. **Sync `current_focus`** after the phase entry decision is made (write `bc` + `phase` + `last_updated`).
 
 **Cross-phase contradiction detection**: before entering any phase, verify that prior phase output does not contradict decisions about to be made. Contradiction detected → pause, flag, suggest rolling back.
 
@@ -284,17 +306,18 @@ There are three distinct stores. Do not mix them:
 | Layer | File | Scope | Write frequency | Conflict priority |
 |-------|------|-------|-----------------|-------------------|
 | User-level | Claude Code memory (`/Users/.../memory/` etc.) | Personal, cross-project preferences (「我都不要囉嗦」, 「我偏好 Hexagonal」) | Low | Lowest |
-| Project progress | `.claude/arch-state.md` | Progress tracking (current focus BC/phase, per-phase status, output paths, summary counts) | High — overwritten as phases complete | Mid (factual) |
-| Project learnings | `.claude/arch-learnings.md` | Decision history, Phase 4 ⚠️/❌ findings, cross-phase open questions, user-triggered learnings | Append-only | Highest (project-level convention) |
+| Project current focus | `.claude/arch-state.md` | Intent only: `current_focus.{bc, phase}` + `last_updated`. Phase progress is derived from `{coach_output_root}/` filesystem, not stored. | Low — only when focus moves | Mid (factual) |
+| Project learnings | `.claude/arch-learnings.md` | Decision history, Phase 4 ⚠️/❌ findings, cross-phase open questions, user-triggered learnings, Phase 4 review audit (`phase_4_reviews:` block) | Append-only | Highest (project-level convention) |
 
-**Conflict rule**: project learnings > project progress facts > personal preferences. Project-level conventions trump personal preferences (avoid leaking individual habits into team artifacts).
+**Conflict rule**: project learnings > project current focus > personal preferences. Project-level conventions trump personal preferences (avoid leaking individual habits into team artifacts).
 
 **Where each thing goes**:
 
 - A user complaint about your behavior repeated 3+ times in this session → ask before writing; if 「本專案永遠如此」 → `arch-learnings.md`, if 「跨專案一律如此」 → Claude Code memory.
 - Phase 4 Review ⚠️/❌ findings → auto-written to `arch-learnings.md` (`source: phase_4`).
+- Phase 4 Review per-run audit record (date, scope, scores, critical fixes, rollback flag) → `arch-learnings.md` `phase_4_reviews:` block.
 - `/arch-learn <content>` → `arch-learnings.md` by default; if content reads as personal preference, suggest writing to memory instead.
-- Phase status, completed BCs, current focus → `arch-state.md` only.
+- Current focus (which BC, which phase the user is working on) → `arch-state.md` `current_focus`. Phase completion / output paths / per-BC summaries are NOT stored — they are derived from filesystem (see State Determination above).
 
 **Before entering any phase, read all three layers** (memory + arch-state + arch-learnings) and fold relevant items into your guidance — do not quote them back, just apply. Example: if learnings contains 「本專案 explanation mode 預設關閉」, skip decision-point commentary from the start.
 
