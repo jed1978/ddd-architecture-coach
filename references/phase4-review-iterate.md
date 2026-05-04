@@ -266,7 +266,7 @@ After review is accepted by the user:
 2. **Patterns that recur across BCs** → generalize and append with `applies_to: all`
 3. **User's challenges to your scoring** (where you changed a score based on their context) → append as learning with note on why the context changed the judgment
 
-`arch-state.md` is updated separately for progress tracking (status, scoreboard summaries, rollback decisions) — see Phase 4 Output Checklist below.
+`arch-state.md` is touched only to update `current_focus` (e.g., when a rollback retargets a phase) and `last_updated` — see Phase 4 Output Checklist below. Per-review audit data (date, scope, scores, critical fixes, rollback flag) goes into `arch-learnings.md` `phase_4_reviews:`.
 
 This prevents the next BC's Phase 3 (or next project's Phase 2) from repeating the same mistakes.
 

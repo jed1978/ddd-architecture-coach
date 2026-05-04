@@ -39,7 +39,7 @@ Per SKILL.md: instructions in English, user-facing output in Traditional Chinese
 | **greenfield** | New project, no prior architecture decisions | Draft from Phase 1 + project-context.md alone |
 | **incremental** | Adding to an established system (e.g., adding new BC to existing Context Map) | Read existing Phase 2 doc; produce delta only; flag conflicts with established decisions |
 
-Always check `arch-state.md` before starting to determine mode.
+Always determine mode by probing the filesystem (per SKILL.md → State Determination): `{coach_output_root}/system/context-map.md` already has the relationships + deployment sections → `incremental`; otherwise `greenfield`.
 
 ---
 

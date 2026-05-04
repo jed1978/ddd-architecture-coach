@@ -94,7 +94,7 @@ ddd-architecture-coach/
     │   └── arch-learn.md                  # 寫一條 learning
     └── templates/
         ├── project-context-template.md    # 專案描述、tech stack、model 選擇
-        ├── arch-state-template.md         # coach 維護：進度（高頻覆寫）
+        ├── arch-state-template.md         # coach 維護：current_focus + last_updated（其餘進度從 docs/ddd 推論）
         └── arch-learnings-template.md     # coach 維護：learnings + open questions（append-only）
 ```
 

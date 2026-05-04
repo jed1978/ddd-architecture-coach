@@ -30,12 +30,12 @@ Per SKILL.md: instructions in English, user-facing output in Traditional Chinese
 
 ## Mode Selection
 
-Read `arch-state.md` to determine execution mode:
+Determine execution mode by probing `{coach_output_root}/` (per SKILL.md → State Determination):
 
 | Mode | Trigger | Scope |
 |------|---------|-------|
-| **system-full** | New project (no system-level output exists) | Run Steps 1-4, then per-BC Steps 5-6 for the first BC |
-| **system-incremental** | New BC added to existing project | Update `{coach_output_root}/system/domain-stories.md` with new scenarios/events if needed; skip to per-BC Steps 5-6 |
+| **system-full** | No `{coach_output_root}/system/domain-stories.md` exists | Run Steps 1-4, then per-BC Steps 5-6 for the first BC |
+| **system-incremental** | System-level files exist; user adds a new BC | Update `{coach_output_root}/system/domain-stories.md` with new scenarios/events if needed; skip to per-BC Steps 5-6 |
 | **per-bc** | System-level complete, starting a new BC | Run Steps 5-6 only; reuse existing UL; do not rebuild system-level artifacts |
 
 Before entering the steps, tell the user which mode and why.
@@ -177,7 +177,7 @@ For every row, verify it passes the three-question test:
 
 If any intervention point fails the test → apply SKILL.md's AI veto conditions and flag as 「不建議用 AI」. When explanation mode is ON, explain which veto condition applied.
 
-**Open Questions** (max 5): observed information gaps, contradictions, ambiguities. Write into `arch-state.md` → `unresolved_questions`.
+**Open Questions** (max 5): observed information gaps, contradictions, ambiguities. Append into `arch-learnings.md` → `open_questions:`.
 
 ---
 
@@ -285,7 +285,7 @@ When the user challenges a term you used or naturally uses a different term when
 
 While producing Step 2's event timeline, whenever you encounter a region dense with fallback branches or AI-uncertainty events, flag it explicitly:
 
-> 「這個區域是 hotspot（fallback 匯集處），Phase 2 設計 AI-ADR 和 aggregate 邊界時要特別注意。我會在 arch-state.md 記下來。」
+> 「這個區域是 hotspot（fallback 匯集處），Phase 2 設計 AI-ADR 和 aggregate 邊界時要特別注意。我會記到 arch-learnings.md 的 open_questions。」
 
 ### Deferred Challenge
 
@@ -297,7 +297,7 @@ If you notice a problem that is better addressed in a later step (e.g., while wr
 
 ## System-Incremental Mode Special Handling
 
-When `arch-state.md` already has system-level output and the user is adding a new BC:
+When `{coach_output_root}/system/` already has domain-stories.md + context-map.md and the user is adding a new BC:
 
 1. **Read existing UL first**: new BC and Aggregate names must be compatible; flag conflicts explicitly
 2. **System-level update**: if new BC introduces new scenarios or events, append to `{coach_output_root}/system/domain-stories.md`; do not rewrite existing content

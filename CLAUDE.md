@@ -21,7 +21,7 @@ When modifying skill content, the following invariants must be preserved (violat
 3. **Decision-priority ordering** in SKILL.md (Domain correctness > fallback > verifiability > team executability) is referenced by name from the phase files. Re-ordering requires updating downstream references.
 4. **AI veto conditions** (four listed in SKILL.md) are referenced by Phase 2's AI-ADR workflow. Keep wording aligned across files.
 5. **File-structure contract** — `docs/system/{domain-stories,context-map}.md` and `docs/{bc}/{discovery,decisions,spec}.md` are the artifact paths the skill produces in user projects. Phase files assume these exact paths.
-6. **Phase-selection state machine** in SKILL.md ("State determination" section) reads `arch-state.md` to decide which phase to enter. Adding a phase or step requires updating both the state machine and `arch-state-template.md`.
+6. **Phase-selection state machine** in SKILL.md ("State determination" section) reads `arch-state.md` for `current_focus` (intent) and probes `{coach_output_root}/` for actual artefact existence (and `spec.md` frontmatter `status` for Phase 3 stability). `arch-state.md` no longer holds per-phase status mirrors. Adding a phase or step requires updating the state-determination algorithm in SKILL.md and may require updating `arch-state-template.md` only if the new step changes what `current_focus.phase` can be.
 
 ## Content Architecture
 
@@ -34,7 +34,7 @@ Two-axis flow:
 
 Phase 4 is orthogonal — it reviews any artifact at any time using five health checklists.
 
-`arch-state.md` (in user projects, generated from the template here) is the persistent memory: progress, current focus BC/phase, and a `learnings` section fed by three sources (session preferences, Phase 4 ⚠️/❌ findings, `/arch-learn` commands). Before entering a phase, learnings must be read and applied silently — not quoted back.
+`arch-state.md` (in user projects, generated from the template here) holds **only** `current_focus.{bc, phase}` + `last_updated`. Phase completion / output paths / per-BC summaries are derived from `{coach_output_root}/` filesystem (and from `spec.md` frontmatter for Phase 3 stability) — not stored. `arch-learnings.md` holds the `learnings:` section (fed by three sources: session preferences, Phase 4 ⚠️/❌ findings, `/arch-learn` commands), `open_questions:`, and the `phase_4_reviews:` audit log. Before entering a phase, learnings must be read and applied silently — not quoted back.
 
 ## When Working in This Repo
 

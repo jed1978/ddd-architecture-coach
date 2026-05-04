@@ -93,7 +93,7 @@ ddd-architecture-coach/
     │   └── arch-learn.md                  # Append a learning
     └── templates/
         ├── project-context-template.md    # Project description, tech stack, model choice
-        ├── arch-state-template.md         # Coach maintains: progress only (high-frequency writes)
+        ├── arch-state-template.md         # Coach maintains: current_focus + last_updated (phase progress is derived from docs/ddd)
         └── arch-learnings-template.md     # Coach maintains: learnings + open questions (append-only)
 ```
 
