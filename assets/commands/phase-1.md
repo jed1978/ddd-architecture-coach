@@ -1,5 +1,5 @@
 ---
-description: Force entry into Phase 1 (Domain Discovery). Skips state-based phase selection. Use when you explicitly want to (re-)run scenario modeling, event/command extraction, BC delineation, classification, AI opportunities, or User Stories.
+description: Force entry into Phase 1 (Domain Discovery). Skips state-based phase selection. Use when you explicitly want to (re-)run scenario modeling, event/command extraction, BC delineation, classification, touchpoint map, AI opportunities, or User Stories.
 ---
 
 請啟動 DDD Architecture Coach（`ddd-architecture-coach` skill）並**強制進入 Phase 1**。

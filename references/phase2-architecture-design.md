@@ -51,6 +51,7 @@ Before drafting, verify:
 2. **`project-context.md` complete**: tech_stack, cloud_provider, team_size, budget_sensitivity all filled
 3. **Existing project conventions known**: read CLAUDE.md, .claude/rules/ if present
 4. **AI intervention candidates identified in Phase 1**: Phase 2 will produce AI-ADRs for each candidate
+5. **Touchpoint Map read**: read `{coach_output_root}/system/touchpoints.md` (Phase 1 Step 5) before designing Context Map integration patterns. The touchpoints file already lists co-presence scenarios and derived integration pattern candidates (push subscription / SSE / polling / outbox + pubsub) per cross-touchpoint event flow — Phase 2 should validate / refine those candidates against BC-internal architecture, not re-derive them. If `touchpoints.md` is missing (legacy v0.1.0 project), flag the gap to the user before proceeding (per SKILL.md backward-compat warning).
 
 Any missing → halt and request from user.
 

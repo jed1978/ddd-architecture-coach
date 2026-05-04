@@ -66,7 +66,8 @@ The spec for one BC contains these sections in order. Each section's purpose and
 
 **Format notes**:
 
-- Use a top-of-file metadata block (YAML frontmatter): `bc`, `version`, `phase: 3`, `date`, `status: draft | v1.x`, `input_documents`, `output_documents`. The `status` field is the source of truth for Phase 3 stability — replaces the previous `arch-state.completed_bcs` mechanism. Set `status: draft` while iterating; flip to `status: v1.x` once the spec is stable enough to serve as a `template-from-prior` template for subsequent BCs.
+- Use a top-of-file metadata block (YAML frontmatter): `bc`, `version`, `phase: 3`, `date`, `status: draft | v1.x`, `input_documents`, `output_documents`, `subscribers`. The `status` field is the source of truth for Phase 3 stability — replaces the previous `arch-state.completed_bcs` mechanism. Set `status: draft` while iterating; flip to `status: v1.x` once the spec is stable enough to serve as a `template-from-prior` template for subsequent BCs.
+- The `subscribers` field is a list of touchpoint identifiers (cross-referencing `{coach_output_root}/system/touchpoints.md`) — every UI / channel surface that subscribes to this BC's emitted events, including secondary observers (agent console, supervisor dashboard, audit/compliance log viewers). Phase 4 review checks alignment between this list and the touchpoints file. If `touchpoints.md` is absent (legacy v0.1.0 project), leave `subscribers:` empty and note the gap in Open Questions.
 - Mark inherited decisions with their phase source (e.g., "Phase 1 決策 A", "Phase 2 §3.1") for traceability
 
 ### §2 MVP-Core Scope Boundary
@@ -1247,7 +1248,7 @@ Phase progress is derived from `{coach_output_root}/{bc}/spec.md` existence; spe
 When this BC's Phase 3 reaches v1.x stable (no more spec-structure changes expected):
 
 - Update `{coach_output_root}/{bc}/spec.md` frontmatter `status: v1.x` (until then, keep `status: draft`). This is the signal that the spec is ready to serve as a `template-from-prior` template for subsequent BCs.
-- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically the next BC's Phase 1 Step 5-6, or staying on this BC for Phase 4 review).
+- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically the next BC's Phase 1 Steps 6-7, or staying on this BC for Phase 4 review).
 - Update `last_updated`.
 
 Per-BC summary data (aggregates + invariant counts + events emitted + repository count + integration count + test scenario count) lives in `spec.md` itself, where it is the canonical source — not duplicated to arch-state.

@@ -97,11 +97,14 @@ Evaluates whether the domain model is well-bounded, correctly named, and structu
 | D-5 | Cross-BC communication uses explicit integration patterns | Events or well-defined interfaces; no direct Aggregate-to-Aggregate references across BCs | BC A imports BC B's Aggregate class; or BC A queries BC B's database tables directly |
 | D-6 | Core / Supporting / Generic classification drives investment decisions | Core domains get custom implementation; Generic domains use off-the-shelf solutions | Custom-building a Generic domain (e.g., hand-rolling auth); or treating a Core domain as Generic (e.g., outsourcing the differentiator) |
 | D-7 | Domain Layer has zero external dependencies | Domain project references no infrastructure, no framework, no other BC | Domain Layer imports DbContext, HttpClient, MediatR, or another BC's namespace |
+| D-8 | Event subscribers align with Touchpoint Map | Each emitted event in this BC's spec lists subscribers (`subscribers:` frontmatter); every subscriber is also recorded in `{coach_output_root}/system/touchpoints.md` §1 inventory; co-presence scenarios in touchpoints.md §2 are reachable from at least one BC's events | BC emits an event that has visible UI/audit consumers in production but no entry in `subscribers:`; or `touchpoints.md` lists a secondary observer (e.g., agent console) that no BC actually emits events to |
 
 **Phase-specific focus**:
 - Reviewing Phase 1 → D-1, D-2, D-4, D-6 are primary
-- Reviewing Phase 2 → D-1, D-5, D-6 are primary
-- Reviewing Phase 3 → D-2, D-3, D-4, D-7 are primary
+- Reviewing Phase 2 → D-1, D-5, D-6, D-8 are primary
+- Reviewing Phase 3 → D-2, D-3, D-4, D-7, D-8 are primary
+
+**Backward-compat note for D-8**: legacy v0.1.0 projects without `touchpoints.md` cannot pass D-8 mechanically. For these, mark D-8 as ⚠️ "deferred — touchpoints.md missing", append to `arch-learnings.md` `open_questions:`, and skip rather than failing the whole DDD checklist. New BCs created after touchpoints.md is in place must satisfy D-8.
 
 ---
 
