@@ -12,6 +12,7 @@
 > Before entering any phase, the coach reads this file alongside `arch-state.md`. Relevant entries are folded into guidance — applied, not quoted back.
 >
 > The `phase_4_reviews:` block holds per-review audit records (formerly in `arch-state.md`).
+> The `slices_shipped:` block is an append-only summary of shipped implementation slices — 3-5 line distillations, not full ship logs (git history is authoritative for commits / metrics / file lists).
 
 ---
 
@@ -95,4 +96,21 @@ phase_4_reviews:
   #     #   resolution_status: pending | done
   #   rollback_recommended: false     # true | false
   #   target_rollback_phase:          # only when rollback_recommended: true
+```
+
+---
+
+## Slices Shipped
+
+Append-only summary of shipped implementation slices. Each entry is a 3-5 line distillation — what the slice added and why. Full ship details (commits, file lists, metrics, wave-by-wave breakdown) live in git history and are not duplicated here. Future BCs can scan this list to find similar prior patterns to reuse.
+
+```yaml
+slices_shipped:
+  # - bc:                # specific_bc:<name> | system | cross_bc
+  #   name:              # short slice name, e.g. multi-turn-slot-filling
+  #   branch:            # feat/...
+  #   shipped_date:      # ISO date
+  #   summary:           # 3-5 lines plain English: what this slice added + why
+  #   key_artifacts:     # 1-3 main files / Aggregates / VOs (optional)
+  #   follow_ups:        # bullet list of related defer/spinoff slices (optional)
 ```
