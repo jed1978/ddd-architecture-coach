@@ -14,7 +14,7 @@
 ```yaml
 current_focus:
   bc:                    # BC name; blank when working at system level
-  phase:                 # phase_1_step_1_4 | phase_1_step_5_6 | phase_2 | phase_3 | phase_4
+  phase:                 # phase_1_step_1_5 | phase_1_step_6_7 | phase_2 | phase_3 | phase_4
 
 last_updated:            # ISO date, e.g., 2026-05-04
 ```
