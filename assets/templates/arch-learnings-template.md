@@ -7,9 +7,11 @@
 > - `user_triggered`: user executes `/arch-learn <content>` (class D)
 >
 > Conflict priority (per SKILL.md → Memory / State / Learnings):
-> personal Claude Code memory < `arch-state.md` progress facts < this file's learnings
+> personal Claude Code memory < `arch-state.md` current focus < this file's learnings
 >
 > Before entering any phase, the coach reads this file alongside `arch-state.md`. Relevant entries are folded into guidance — applied, not quoted back.
+>
+> The `phase_4_reviews:` block holds per-review audit records (formerly in `arch-state.md`).
 
 ---
 
@@ -69,4 +71,28 @@ resolved_archive:
   #   resolution:
   #   raised_in_phase:
   #   resolved_at:
+```
+
+---
+
+## Phase 4 Review History
+
+Append-only audit log of Phase 4 reviews. Written by the coach after each review run. Companion to the `learnings:` block above — `phase_4_reviews` records *what was reviewed and how it scored*, while `learnings:` records *what to remember for future phases* (with `source: phase_4`).
+
+```yaml
+phase_4_reviews:
+  # - date:                           # ISO date, e.g., 2026-05-04
+  #   review_scope:                   # phase_1 | phase_2 | phase_3:<BC_name>
+  #   scores_summary:
+  #     ddd_health:                   # e.g., "2 ✅ / 1 ⚠️ / 0 ❌"
+  #     ai_health:
+  #     eng_health:
+  #     cloud_health:
+  #     sbe_health:
+  #   critical_fixes:
+  #     # - issue:
+  #     #   severity: P0 | P1 | P2
+  #     #   resolution_status: pending | done
+  #   rollback_recommended: false     # true | false
+  #   target_rollback_phase:          # only when rollback_recommended: true
 ```
