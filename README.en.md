@@ -72,6 +72,8 @@ Trade-off: DDD discipline becomes your responsibility. None of these paths give 
 
 **AI is not the default.** Every AI proposal must answer: why AI? what's the fallback? how to verify? A two-tier veto applies — one Hard condition (financial/legal harm without human-in-the-loop) rejects AI unconditionally; three Soft conditions (deterministic alternative reaches 95%+, fallback cost/latency comparable, no golden dataset) presume rejection unless explicitly overridden with documented rationale.
 
+**Touchpoint Map closes a DDD discovery gap.** DDD's classic toolkit (Domain Storytelling, Event Storming, User Stories) is single-driver-biased — it captures "who did what" but not "who else is watching at the same time". Phase 1 Step 5 forces enumeration of every UI/channel surface (web, admin console, Telegram, SMS, agent console, audit viewer…) × primary actor × **secondary observers** × **freshness budget**, with at least one mandatory cross-surface co-presence scenario. Example: a User Story like "customer chats with AI" doesn't surface the requirement "agent console must mirror the conversation within 1 second" — Touchpoint Map drags such cross-surface NFRs to Phase 1 instead of letting them slip until testing. Borrowed from Service Blueprint (Shostack, 1984), kept lightweight — touchpoint × actor only, no full journey / emotion / metrics swim lanes.
+
 **Specification by Example (SBE)** is built into Phase 3. Key Examples in Gherkin format serve simultaneously as spec, test case, and documentation.
 
 ## File Structure

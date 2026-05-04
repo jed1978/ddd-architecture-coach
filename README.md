@@ -73,6 +73,8 @@ bc-developer 是被動 subagent — 沒被 invoke 就不會跑；裝在 `.claude
 
 **AI 不是預設選項**。每個 AI 提案必須回答：為什麼用 AI？fallback 是什麼？怎麼驗證？採兩級 veto — 一個 Hard 條件（financial/legal 損害且無 human-in-the-loop）無條件否決；三個 Soft 條件（deterministic 替代達 95%+ 準確率、fallback 成本/延遲相當、無 golden dataset）推定否決，除非有書面理由 override。
 
+**Touchpoint Map 補 DDD 探索盲點**。DDD 的探索工具（Domain Storytelling、Event Storming、User Stories）天生 single-driver-biased — 抓得到「誰做了什麼」，抓不到「誰在背後同時看著」。Phase 1 Step 5 強制列舉所有 UI / channel surface（web、admin console、Telegram、SMS、agent console、audit viewer…）× 主要 actor × **secondary observers** × **freshness budget**，並要求至少 1 個跨 surface 的 co-presence scenario。例：「客人跟 AI 對話」的 User Story 抓不到「客服 console 必須在 1 秒內看到對話內容」這種跨 surface 即時 mirror 規格 — Touchpoint Map 把這種需求逼到 Phase 1 表面，不等 testing 才發現。詞源來自 Service Blueprint（Shostack, 1984），保留 touchpoint × actor 部分、捨棄 journey / emotion / metrics 重量。
+
 **Specification by Example（SBE）** 內建於 Phase 3。Gherkin 格式的 Key Examples 同時是 spec、測試案例、文件。
 
 ## 檔案結構
