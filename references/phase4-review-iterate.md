@@ -283,13 +283,16 @@ When reviewing a new BC's Phase 3 spec while prior BCs exist:
 
 ---
 
-## Phase 4 Output Checklist (write to arch-state.md)
+## Phase 4 Output Checklist
 
-After review is accepted:
+Phase 4 review records are append-only audit data and live in `arch-learnings.md`, not `arch-state.md`. After review is accepted:
 
-- `arch-state.md` → `phase_4.status`: completed (for this review scope)
-- `arch-state.md` → `phase_4.review_scope`: which phases/BCs were reviewed
-- `arch-state.md` → `phase_4.scores_summary`: ✅/⚠️/❌ counts per checklist
-- `arch-state.md` → `phase_4.critical_fixes`: list of P0 ❌ items and their resolution status
-- `arch-state.md` → `phase_4.rollback_recommended`: yes/no + target phase if yes
-- `arch-learnings.md`: append new learnings with `source: phase_4` (per Learnings Writeback section above)
+- Append a new entry to `arch-learnings.md` `phase_4_reviews:` with:
+  - `date` — ISO date of this review run
+  - `review_scope` — which phases/BCs were reviewed (e.g., `phase_3:Booking`)
+  - `scores_summary` — ✅/⚠️/❌ counts per checklist (`ddd_health`, `ai_health`, `eng_health`, `cloud_health`, `sbe_health`)
+  - `critical_fixes` — list of P0 ❌ items, each with `severity` and `resolution_status` (`pending` | `done`)
+  - `rollback_recommended` — `true` | `false`
+  - `target_rollback_phase` — only when `rollback_recommended: true`
+- Append individual learnings (the qualitative lessons distilled from this review) to `arch-learnings.md` `learnings:` with `source: phase_4` (per Learnings Writeback section above).
+- Update `arch-state.md` `current_focus` if the review concluded a rollback (point at the target phase) or moved to a new BC; update `last_updated`.

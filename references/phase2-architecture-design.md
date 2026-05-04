@@ -596,20 +596,21 @@ If sync audit fails, fix Phase 1 first (or document Phase 2's deviation with rat
 
 ---
 
-## Phase 2 Output Checklist (write to arch-state.md)
+## Phase 2 Output Checklist
 
-When Phase 2 system-level reaches stable v1.x, write to `arch-state.md`:
+Phase progress is derived from filesystem (see SKILL.md → State Determination); do NOT mirror status, output paths, or per-BC summaries into `arch-state.md`. Only update `current_focus` and `last_updated`.
 
-- `phase_2_system.status`: completed
-- `phase_2_system.output_doc`: `{coach_output_root}/system/context-map.md`
-- `phase_2_system.deployment_decision`: Modular Monolith / Microservices / etc.
+When Phase 2 system-level reaches stable v1.x:
 
-When Phase 2 per-BC reaches stable, write to `arch-state.md`:
+- Ensure `{coach_output_root}/system/context-map.md` includes both the relationships and deployment sections (their presence IS the completion signal). The deployment decision (Modular Monolith / Microservices / etc.) lives in the document, not in arch-state.
+- Update `arch-state.md` `current_focus` to point at whichever BC's Phase 2 (or Phase 3) is next.
+- Update `last_updated`.
 
-- `phase_2_bc.{bc}.status`: completed
-- `phase_2_bc.{bc}.output_doc`: `{coach_output_root}/{bc}/decisions.md`
-- `phase_2_bc.{bc}.decisions_count`
-- `phase_2_bc.{bc}.ai_adrs`: active ADRs + rejection count
+When Phase 2 per-BC reaches stable:
+
+- Ensure `{coach_output_root}/{bc}/decisions.md` is written (its existence IS the completion signal). Decisions count, AI-ADRs, and rejection count live in that document.
+- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically `phase_3` for the same BC).
+- Update `last_updated`.
 
 Append to `arch-learnings.md`:
 

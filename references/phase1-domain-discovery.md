@@ -307,20 +307,21 @@ When `arch-state.md` already has system-level output and the user is adding a ne
 
 ---
 
-## Phase 1 Output Checklist (write to arch-state.md)
+## Phase 1 Output Checklist
 
-At the end of Phase 1 system-level (Steps 1-4), write to `arch-state.md`:
+Phase progress is derived from filesystem (see SKILL.md → State Determination); do NOT write per-phase status, output paths, or summary counts to `arch-state.md`. Only update `current_focus` and `last_updated`.
 
-- `phase_1_system.status: completed`
-- `phase_1_system.output_docs`: `{coach_output_root}/system/domain-stories.md`, `{coach_output_root}/system/context-map.md` (classification section)
-- `bc_count`, `bc_names`, `core_domains`, `supporting_domains`, `generic_domains`
+At the end of Phase 1 system-level (Steps 1-4):
 
-At the end of Phase 1 per-BC (Steps 5-6), write per BC to `arch-state.md`:
+- Write/append `{coach_output_root}/system/domain-stories.md` and the classification section of `{coach_output_root}/system/context-map.md` (these files' existence IS the completion signal).
+- Update `arch-state.md` `current_focus` (typically clear `bc` and set `phase: phase_1_step_5_6` once the user picks the first BC).
+- Update `last_updated`.
 
-- `phase_1_bc.{bc}.status: completed`
-- `phase_1_bc.{bc}.output_doc`: `{coach_output_root}/{bc}/discovery.md`
-- `phase_1_bc.{bc}.user_stories_count`
-- `phase_1_bc.{bc}.ai_intervention_points`
+At the end of Phase 1 per-BC (Steps 5-6):
+
+- Write `{coach_output_root}/{bc}/discovery.md` (its existence IS the completion signal).
+- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically `phase_2` for the same BC, or another BC's `phase_1_step_5_6` if interleaving).
+- Update `last_updated`.
 
 Append to `arch-learnings.md`:
 
