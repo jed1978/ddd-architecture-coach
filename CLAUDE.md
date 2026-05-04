@@ -20,7 +20,7 @@ When modifying skill content, the following invariants must be preserved (violat
 2. **Bilingual policy** — instructions to Claude are written in English; user-facing output is Traditional Chinese with technical terms left in English. Chinese text inside `「...」` quotation marks is verbatim output to reproduce, not paraphrasable example copy.
 3. **Decision-priority ordering** in SKILL.md (Domain correctness > fallback > verifiability > team executability) is referenced by name from the phase files. Re-ordering requires updating downstream references.
 4. **AI veto conditions** (four listed in SKILL.md) are referenced by Phase 2's AI-ADR workflow. Keep wording aligned across files.
-5. **File-structure contract** — `docs/system/{domain-stories,context-map}.md` and `docs/{bc}/{discovery,decisions,spec}.md` are the artifact paths the skill produces in user projects. Phase files assume these exact paths.
+5. **File-structure contract** — `docs/system/{domain-stories,context-map,touchpoints}.md` and `docs/{bc}/{discovery,decisions,spec}.md` are the artifact paths the skill produces in user projects. Phase files assume these exact paths.
 6. **Phase-selection state machine** in SKILL.md ("State determination" section) reads `arch-state.md` for `current_focus` (intent) and probes `{coach_output_root}/` for actual artefact existence (and `spec.md` frontmatter `status` for Phase 3 stability). `arch-state.md` no longer holds per-phase status mirrors. Adding a phase or step requires updating the state-determination algorithm in SKILL.md and may require updating `arch-state-template.md` only if the new step changes what `current_focus.phase` can be.
 
 ## Content Architecture
@@ -29,8 +29,8 @@ The skill operates as a **producer/reviewer** workflow, not a Q&A coach: Claude 
 
 Two-axis flow:
 
-- **System-level** runs once per project: Phase 1 Steps 1–4 produce `domain-stories.md` + the classification section of `context-map.md`.
-- **Per-BC** runs independently per Bounded Context: Phase 1 Steps 5–6 → Phase 2 → Phase 3, each producing one file under `docs/{bc}/`. BCs can interleave; the spec is explicit that this enables incremental delivery.
+- **System-level** runs once per project: Phase 1 Steps 1–5 produce `domain-stories.md` + the classification section of `context-map.md` + `touchpoints.md`.
+- **Per-BC** runs independently per Bounded Context: Phase 1 Steps 6–7 → Phase 2 → Phase 3, each producing one file under `docs/{bc}/`. BCs can interleave; the spec is explicit that this enables incremental delivery.
 
 Phase 4 is orthogonal — it reviews any artifact at any time using five health checklists.
 

@@ -8,7 +8,7 @@ A Claude Code skill that helps you make architecture decisions for DDD projects.
 
 Guides you through four phases of architecture planning:
 
-1. **Domain Discovery** — structured scenario modeling, event/command extraction, BC delineation, User Stories
+1. **Domain Discovery** — structured scenario modeling, event/command extraction, BC delineation, Touchpoint Map (surface × actor × co-presence), User Stories
 2. **Architecture Design** — Context Map, per-BC architecture decisions, cloud deployment blueprint, AI-ADRs
 3. **Implementation Spec** — Aggregate design, Key Examples (Gherkin/SBE), layered responsibilities, test specs, CI/CD
 4. **Review & Iterate** — five health checklists (DDD / AI / engineering / cloud / SBE)
@@ -108,6 +108,7 @@ The coach produces artifacts in a BC-centric layout under `coach_output_root` (a
   system/
     domain-stories.md          # Scenarios + event/command timeline (cross-BC)
     context-map.md             # BC classification, relationships, deployment
+    touchpoints.md             # All UI/channel surfaces × actors × co-presence + derived integration patterns
   {bc}/
     discovery.md               # BC-local events, User Stories, UL, AI opportunities
     decisions.md               # Architecture decisions, AI-ADRs

@@ -8,7 +8,7 @@
 
 引導你走完四個階段的架構規劃：
 
-1. **Domain Discovery** — 結構化情境建模、event/command 萃取、BC 劃分、User Stories
+1. **Domain Discovery** — 結構化情境建模、event/command 萃取、BC 劃分、Touchpoint Map（surface × actor × co-presence）、User Stories
 2. **Architecture Design** — Context Map、各 BC 內部架構決策、雲端部署藍圖、AI-ADRs
 3. **Implementation Spec** — Aggregate 設計、Key Examples（Gherkin/SBE）、分層責任、測試規格、CI/CD
 4. **Review & Iterate** — 五份健康度檢查（DDD / AI / engineering / cloud / SBE）
@@ -109,6 +109,7 @@ coach 在 BC-centric layout 下產出 artifacts，全部放在 `coach_output_roo
   system/
     domain-stories.md          # 情境 + event/command timeline（跨 BC）
     context-map.md             # BC 分類、關係、部署
+    touchpoints.md             # 所有 UI/channel surface × actor × co-presence + 衍生 integration patterns
   {bc}/
     discovery.md               # BC-local events、User Stories、UL、AI 機會
     decisions.md               # 架構決策、AI-ADRs
