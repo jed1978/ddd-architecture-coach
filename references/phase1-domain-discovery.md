@@ -5,8 +5,8 @@
 From the user's product/project description, produce initial Bounded Context boundaries, Domain Events, Commands, Policies, Ubiquitous Language, User Stories, and AI intervention opportunities.
 
 Phase 1 has two scopes:
-- **System-level (Steps 1-4)**: scenarios, event/command timeline, BC delineation, classification → output to `{coach_output_root}/system/`
-- **Per-BC (Steps 5-6)**: AI opportunities, User Stories, BC-local UL → output to `{coach_output_root}/{bc}/discovery.md`
+- **System-level (Steps 1-5)**: scenarios, event/command timeline, BC delineation, classification, touchpoint map → output to `{coach_output_root}/system/`
+- **Per-BC (Steps 6-7)**: AI opportunities, User Stories, BC-local UL → output to `{coach_output_root}/{bc}/discovery.md`
 
 > Resolve `{coach_output_root}` from `.claude/project-context.md` (default `docs/ddd/`) before writing.
 
@@ -34,9 +34,9 @@ Determine execution mode by probing `{coach_output_root}/` (per SKILL.md → Sta
 
 | Mode | Trigger | Scope |
 |------|---------|-------|
-| **system-full** | No `{coach_output_root}/system/domain-stories.md` exists | Run Steps 1-4, then per-BC Steps 5-6 for the first BC |
-| **system-incremental** | System-level files exist; user adds a new BC | Update `{coach_output_root}/system/domain-stories.md` with new scenarios/events if needed; skip to per-BC Steps 5-6 |
-| **per-bc** | System-level complete, starting a new BC | Run Steps 5-6 only; reuse existing UL; do not rebuild system-level artifacts |
+| **system-full** | No `{coach_output_root}/system/domain-stories.md` exists | Run Steps 1-5, then per-BC Steps 6-7 for the first BC |
+| **system-incremental** | System-level files exist; user adds a new BC | Update `{coach_output_root}/system/domain-stories.md` with new scenarios/events if needed; update `touchpoints.md` if new BC introduces new touchpoints or co-presence flows; skip to per-BC Steps 6-7 |
+| **per-bc** | System-level complete, starting a new BC | Run Steps 6-7 only; reuse existing UL; do not rebuild system-level artifacts |
 
 Before entering the steps, tell the user which mode and why.
 
@@ -163,7 +163,83 @@ Write rationale as either 「沒它產品不成立」 or 「有替代實作方�
 
 ---
 
-### Step 5: AI Intervention Opportunities + Open Questions
+### Step 5: Touchpoint Map (system-level)
+
+**Purpose**: enumerate every UI / channel surface where actors interact with the system, including secondary observers — so co-presence and freshness requirements are captured before they leak into Phase 3 as missing specs.
+
+DDD's discovery toolkit (Domain Storytelling, Event Storming, User Stories) is single-driver-biased. It misses **co-present observers** (a supervisor watching a customer chat, an agent console mirroring an AI conversation), **cross-surface state synchronization**, and **interaction-level NFRs** (real-time mirror latency, audit persistence). This step closes that gap.
+
+Terminology: this is the "touchpoint + actor lane" extraction from a Service Blueprint (Shostack, 1984), kept lightweight — no full journey, no emotion / metrics swim lanes.
+
+**Inputs**: Step 1 scenarios + Step 2 events + Step 3 BC delineation. Touchpoints are derived from "which actors appeared in which scenarios on which surface" — read those first.
+
+**Output**: `{coach_output_root}/system/touchpoints.md` with three sections.
+
+#### §1 Touchpoint Inventory
+
+| Touchpoint | Channel | Primary actor | Secondary observers | Source events (BC) | Subscription mode | Freshness budget |
+
+Rows enumerate every surface — customer-facing AND back-stage. Coach should proactively check these channels, not wait for the user to remember:
+
+- Web SPA / Mobile native / PWA / Admin console
+- Telegram / LINE / WhatsApp / Slack / Discord bots
+- SMS / Voice call / Email / Push notification
+- Webhook / API surface (where another system observes us)
+- Internal: agent console, supervisor dashboard, audit/compliance log viewer
+
+**Subscription mode** values: `push` | `polling` | `pull-on-demand` | `batch`. Tentative; Phase 2 Context Map makes the binding decision.
+
+**Freshness budget** is per-touchpoint expectation with a number — e.g., 「客服 console: ≤ 1s after customer message」, not 「real-time」.
+
+#### §2 Co-presence Scenarios
+
+Mandatory: at least 1 scenario where 2+ actors are concurrently using **different** touchpoints sharing the **same** event stream. If genuinely none → write `N/A — single-actor product, no co-presence` + one-line reason.
+
+For each co-presence scenario:
+
+```
+場景 X：<簡述>
+  涉及 actors / touchpoints：<list>
+  共享 event flow：<emitter event → subscribers>
+  Freshness：<latency budget + 失敗時後果>
+  Persistence：mirror 是否也持久化？或 ephemeral？
+  Failure mode：mirror 失敗時 drop / queue / alert / retry？
+```
+
+#### §3 Derived Integration Patterns（informative）
+
+For each cross-touchpoint event flow in §2, note candidate integration patterns (push subscription / SSE / WebSocket / polling / outbox + pubsub). This is **input** to Phase 2 Context Map — Phase 2 should not re-derive from scratch.
+
+---
+
+**Coach Operating Principles**（沿用 producer/reviewer 模式）：
+
+- Coach 從 Steps 1-3 推所有 actor × channel 組合，**起草初版 inventory，不問空白模板**
+- Secondary observers **主動枚舉**：supervisor / 客服 / admin / auditor / compliance — 每個 inventory row 都要問「誰在背後看？」
+- Freshness budget **起草時給數字**（例 ≤500ms / ≤2s / 5min / 1h），用戶 review 時挑戰
+- 產品若有 customer-facing + ops/admin 兩面 → §2 預設**至少 1 個跨面 mirror 場景**，不要等用戶提
+
+When explanation mode is ON, after producing inventory and §2, list the secondary observers you considered and excluded, with reason.
+
+---
+
+**Common Pitfalls**：
+
+- Inventory 寫成 sitemap：只列頁面、漏掉 non-web channel（Telegram bot 不是「頁面」）
+- Secondary observers 只填籠統「admin」：應細分職能（supervisor / 客服 / auditor / compliance），freshness 要求不同
+- Freshness budget 全填「real-time」：real-time 不是 budget，要數字
+- 跳過 §2 直接 §3：缺中間推導，Phase 2 接不到 rationale
+
+---
+
+**Mode for Incremental Projects**：
+
+- v0.1.0 之前升級上來的專案沒 `touchpoints.md` → 進 Phase 2/3 時 coach flag 警告但不阻擋；建議用戶 ASAP 補做（10-30 分鐘），對既有 BC integration 設計做一次 retro check
+- 既有專案新增 BC → 必讀現有 `touchpoints.md`；新 BC 若 emit 的 events 要 mirror 到既有 touchpoint，append 到 §1；若引入新 touchpoint，append 並更新 §2 / §3
+
+---
+
+### Step 6: AI Intervention Opportunities + Open Questions
 
 **AI Intervention Opportunities**:
 
@@ -181,7 +257,7 @@ If any intervention point fails the test → apply SKILL.md's AI veto conditions
 
 ---
 
-### Step 6: User Stories Derivation (Claude-led)
+### Step 7: User Stories Derivation (Claude-led)
 
 **From Step 1's scenarios, derive User Stories.** Group consecutive scenario steps that form a coherent deliverable behavior unit.
 
@@ -208,7 +284,7 @@ Principles:
 
 When explanation mode is ON, for borderline groupings (steps that could belong to this story or the next), explain the split rationale.
 
-**Step 6 produces two outputs:**
+**Step 7 produces two outputs:**
 
 1. **User Story list** with scenario traceability + BC assignment
 2. **Updated UL table** if new terms emerged during derivation
@@ -266,7 +342,7 @@ Before presenting any scenario narrative, UL table, or BC classification to the 
 
 ## Claude's Proactive Mechanisms
 
-These are not error checks — they are positive behaviors to execute as part of Step 1-6.
+These are not error checks — they are positive behaviors to execute as part of Step 1-7.
 
 ### UL Emergence Mechanism
 
@@ -291,7 +367,7 @@ While producing Step 2's event timeline, whenever you encounter a region dense w
 
 If you notice a problem that is better addressed in a later step (e.g., while writing Step 1 you realize an AI actor might not need AI at all), **do not interrupt Step 1's flow**. Note it explicitly and defer:
 
-> 「最後一點我先記下來，Step 5 會挑戰『Budget Alert Evaluator 真的需要 AI 嗎？』—— 因為『超支就提醒』像是規則判斷。先不爭論，往下走。」
+> 「最後一點我先記下來，Step 6 會挑戰『Budget Alert Evaluator 真的需要 AI 嗎？』—— 因為『超支就提醒』像是規則判斷。先不爭論，往下走。」
 
 ---
 
@@ -311,16 +387,16 @@ When `{coach_output_root}/system/` already has domain-stories.md + context-map.m
 
 Phase progress is derived from filesystem (see SKILL.md → State Determination); do NOT write per-phase status, output paths, or summary counts to `arch-state.md`. Only update `current_focus` and `last_updated`.
 
-At the end of Phase 1 system-level (Steps 1-4):
+At the end of Phase 1 system-level (Steps 1-5):
 
-- Write/append `{coach_output_root}/system/domain-stories.md` and the classification section of `{coach_output_root}/system/context-map.md` (these files' existence IS the completion signal).
-- Update `arch-state.md` `current_focus` (typically clear `bc` and set `phase: phase_1_step_5_6` once the user picks the first BC).
+- Write/append `{coach_output_root}/system/domain-stories.md`, the classification section of `{coach_output_root}/system/context-map.md`, and `{coach_output_root}/system/touchpoints.md` (these files' existence IS the completion signal).
+- Update `arch-state.md` `current_focus` (typically clear `bc` and set `phase: phase_1_step_6_7` once the user picks the first BC).
 - Update `last_updated`.
 
-At the end of Phase 1 per-BC (Steps 5-6):
+At the end of Phase 1 per-BC (Steps 6-7):
 
 - Write `{coach_output_root}/{bc}/discovery.md` (its existence IS the completion signal).
-- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically `phase_2` for the same BC, or another BC's `phase_1_step_5_6` if interleaving).
+- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically `phase_2` for the same BC, or another BC's `phase_1_step_6_7` if interleaving).
 - Update `last_updated`.
 
 Append to `arch-learnings.md`:
