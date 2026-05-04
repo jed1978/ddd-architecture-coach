@@ -29,7 +29,7 @@ Per SKILL.md: instructions in English, user-facing output in Traditional Chinese
 
 **template-from-prior differential rule**: when a prior BC's spec exists, sections that follow established patterns (directory structure, Port→Adapter mapping, stub behavior, reflection test templates, wire format conventions) should state 「沿 {prior BC} pattern」 with a cross-reference, then document ONLY what differs in this BC. Do not reproduce content that is identical to the prior BC. Detail only what is new or specific to this BC.
 
-Always check `arch-state.md` → Phase 3 → `completed_bcs` to determine mode. Tell user which mode and why before starting.
+Always determine mode by scanning `{coach_output_root}/*/spec.md` — if any other BC's `spec.md` exists with frontmatter `status: v1.x` (or, for older specs without the status field, simply exists), use **template-from-prior** with that BC's spec as the structural template. Otherwise, **template-lead**. Tell the user which mode and why before starting.
 
 ---
 
@@ -66,7 +66,7 @@ The spec for one BC contains these sections in order. Each section's purpose and
 
 **Format notes**:
 
-- Use a top-of-file metadata block: version, date, phase label, target BC, input documents, output documents
+- Use a top-of-file metadata block (YAML frontmatter): `bc`, `version`, `phase: 3`, `date`, `status: draft | v1.x`, `input_documents`, `output_documents`. The `status` field is the source of truth for Phase 3 stability — replaces the previous `arch-state.completed_bcs` mechanism. Set `status: draft` while iterating; flip to `status: v1.x` once the spec is stable enough to serve as a `template-from-prior` template for subsequent BCs.
 - Mark inherited decisions with their phase source (e.g., "Phase 1 決策 A", "Phase 2 §3.1") for traceability
 
 ### §2 MVP-Core Scope Boundary
@@ -1240,14 +1240,17 @@ Phase 3 spec is long. Apply these rules:
 
 ---
 
-## Phase 3 Output Checklist (write to arch-state.md)
+## Phase 3 Output Checklist
 
-When this BC's Phase 3 reaches v1.x stable (no more spec-structure changes expected), write to `arch-state.md`:
+Phase progress is derived from `{coach_output_root}/{bc}/spec.md` existence; spec stability is derived from the spec's own frontmatter `status` field (see §1 Format notes). Do NOT mirror status, output paths, aggregate/invariant counts, or other summaries to `arch-state.md`.
 
-- `status`: `spec_v{n}_ready_for_mvp1` for this BC
-- Add to `completed_bcs` (if MVP1+ shipped) or `in_progress_bcs`
-- `output_doc`: `{coach_output_root}/{bc}/spec.md`
-- `per_bc_spec_summary`: aggregates + invariant counts + events emitted + repository count + integration count + test scenario count
+When this BC's Phase 3 reaches v1.x stable (no more spec-structure changes expected):
+
+- Update `{coach_output_root}/{bc}/spec.md` frontmatter `status: v1.x` (until then, keep `status: draft`). This is the signal that the spec is ready to serve as a `template-from-prior` template for subsequent BCs.
+- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically the next BC's Phase 1 Step 5-6, or staying on this BC for Phase 4 review).
+- Update `last_updated`.
+
+Per-BC summary data (aggregates + invariant counts + events emitted + repository count + integration count + test scenario count) lives in `spec.md` itself, where it is the canonical source — not duplicated to arch-state.
 
 Append to `arch-learnings.md`:
 
