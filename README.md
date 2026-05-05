@@ -8,7 +8,7 @@
 
 引導你走完四個階段的架構規劃：
 
-1. **Domain Discovery** — 結構化情境建模、event/command 萃取、BC 劃分、Touchpoint Map（surface × actor × co-presence）、User Stories
+1. **Domain Discovery** — 結構化情境建模、event/command 萃取、BC 劃分、Touchpoint Map（介面形式 surface × 角色 actor × 同步互動 co-presence）、User Stories
 2. **Architecture Design** — Context Map、各 BC 內部架構決策、雲端部署藍圖、AI-ADRs
 3. **Implementation Spec** — Aggregate 設計、Key Examples（Gherkin/SBE）、分層責任、測試規格、CI/CD
 4. **Review & Iterate** — 五份健康度檢查（DDD / AI / engineering / cloud / SBE）
@@ -73,7 +73,7 @@ bc-developer 是被動 subagent — 沒被 invoke 就不會跑；裝在 `.claude
 
 **AI 不是預設選項**。每個 AI 提案必須回答：為什麼用 AI？fallback 是什麼？怎麼驗證？採兩級 veto — 一個 Hard 條件（financial/legal 損害且無 human-in-the-loop）無條件否決；三個 Soft 條件（deterministic 替代達 95%+ 準確率、fallback 成本/延遲相當、無 golden dataset）推定否決，除非有書面理由 override。
 
-**Touchpoint Map 補 DDD 探索盲點**。DDD 的探索工具（Domain Storytelling、Event Storming、User Stories）天生 single-driver-biased — 抓得到「誰做了什麼」，抓不到「誰在背後同時看著」。Phase 1 Step 5 強制列舉所有 UI / channel surface（web、admin console、Telegram、SMS、agent console、audit viewer…）× 主要 actor × **secondary observers** × **freshness budget**，並要求至少 1 個跨 surface 的 co-presence scenario。例：「客人跟 AI 對話」的 User Story 抓不到「客服 console 必須在 1 秒內看到對話內容」這種跨 surface 即時 mirror 規格 — Touchpoint Map 把這種需求逼到 Phase 1 表面，不等 testing 才發現。詞源來自 Service Blueprint（Shostack, 1984），保留 touchpoint × actor 部分、捨棄 journey / emotion / metrics 重量。
+**Touchpoint Map 補 DDD 探索盲點**。DDD 的探索工具（Domain Storytelling、Event Storming、User Stories）天生 single-driver-biased — 抓得到「誰做了什麼」，抓不到「誰在背後同時看著」。Phase 1 Step 5 強制列舉所有 UI / channel 介面形式（web、admin console、Telegram、SMS、agent console、audit viewer…）× 主要 actor × **secondary observers** × **freshness budget**，並要求至少 1 個跨介面形式的同步互動場景（co-presence scenario）。例：「客人跟 AI 對話」的 User Story 難以自然浮現「客服後台必須在 1 秒內看到對話內容」這種跨介面即時同步規格 — 藉由 Touchpoint Map 可以把這類需求在 Phase 1 就強制浮現並加以討論，不會等到開發、測試階段才發現。原始構想來自 Service Blueprint（Shostack, 1984），保留 touchpoint × actor 部分、捨棄較厚重且難以在 skill 重現的其他元素如 journey / emotion / metrics。
 
 **Specification by Example（SBE）** 內建於 Phase 3。Gherkin 格式的 Key Examples 同時是 spec、測試案例、文件。
 
@@ -111,7 +111,7 @@ coach 在 BC-centric layout 下產出 artifacts，全部放在 `coach_output_roo
   system/
     domain-stories.md          # 情境 + event/command timeline（跨 BC）
     context-map.md             # BC 分類、關係、部署
-    touchpoints.md             # 所有 UI/channel surface × actor × co-presence + 衍生 integration patterns
+    touchpoints.md             # 所有 UI/channel 介面形式 × actor × 同步互動 + 衍生 integration patterns
   {bc}/
     discovery.md               # BC-local events、User Stories、UL、AI 機會
     decisions.md               # 架構決策、AI-ADRs
