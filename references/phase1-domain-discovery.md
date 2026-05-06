@@ -385,19 +385,17 @@ When `{coach_output_root}/system/` already has domain-stories.md + context-map.m
 
 ## Phase 1 Output Checklist
 
-Phase progress is derived from filesystem (see SKILL.md → State Determination); do NOT write per-phase status, output paths, or summary counts to `arch-state.md`. Only update `current_focus` and `last_updated`.
+Phase progress is derived from filesystem (see SKILL.md → State Determination); do NOT write per-phase status, output paths, or summary counts to `arch-state.md`. The only `arch-state.md` write is the personal cursor `last_touched: { bc, phase, at }` — and even that is gitignored, per-developer state, not team coordination.
 
 At the end of Phase 1 system-level (Steps 1-5):
 
 - Write/append `{coach_output_root}/system/domain-stories.md`, the classification section of `{coach_output_root}/system/context-map.md`, and `{coach_output_root}/system/touchpoints.md` (these files' existence IS the completion signal).
-- Update `arch-state.md` `current_focus` (typically clear `bc` and set `phase: phase_1_step_6_7` once the user picks the first BC).
-- Update `last_updated`.
+- Update `arch-state.md` `last_touched: { bc: '', phase: phase_1_step_1_5, at: <today> }` (or `phase_1_step_6_7` once the user names the first BC).
 
 At the end of Phase 1 per-BC (Steps 6-7):
 
 - Write `{coach_output_root}/{bc}/discovery.md` (its existence IS the completion signal).
-- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically `phase_2` for the same BC, or another BC's `phase_1_step_6_7` if interleaving).
-- Update `last_updated`.
+- Update `arch-state.md` `last_touched: { bc: <BC>, phase: phase_1_step_6_7, at: <today> }`. If the user explicitly says they're moving to Phase 2 next, you may write `phase_2` instead, but the value is only a personal hint — per-BC commands re-derive intent from their own arguments.
 
 Append to `arch-learnings.md`:
 

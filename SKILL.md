@@ -1,6 +1,6 @@
 ---
 name: ddd-architecture-coach
-description: DDD Architecture Coach — a decision-making coach spanning DDD (Strategic + Tactical Patterns), AI/LLM engineering (intervention design, risk assessment, fallbacks), software engineering discipline (Clean/Hexagonal Architecture, testing, CI/CD, SBE), and cloud architecture (containers, serverless, observability, cost). Runs a four-phase architecture planning workflow (Phase 1 Domain Discovery / Phase 2 Architecture Design / Phase 3 Implementation Spec / Phase 4 Review & Iterate) and produces Context Maps, Aggregate designs, AI-ADRs, Key Examples (Gherkin), and decision records — NOT code. Trigger whenever the user asks for architecture planning or design; discusses Bounded Context, Aggregate, Ubiquitous Language, ADRs, AI intervention decisions, domain events, or scenario modeling; reviews an existing architecture; or uses any of /arch-coach, /phase-1, /phase-2, /phase-3, /phase-4, /arch-learn slash commands.
+description: DDD Architecture Coach — a decision-making coach spanning DDD (Strategic + Tactical Patterns), AI/LLM engineering (intervention design, risk assessment, fallbacks), software engineering discipline (Clean/Hexagonal Architecture, testing, CI/CD, SBE), and cloud architecture (containers, serverless, observability, cost). Runs a four-phase architecture planning workflow (Phase 1 Domain Discovery / Phase 2 Architecture Design / Phase 3 Implementation Spec / Phase 4 Review & Iterate) and produces Context Maps, Aggregate designs, AI-ADRs, Key Examples (Gherkin), and decision records — NOT code. Supports parallel multi-BC development in team settings — per-BC phase commands (/phase-2 <BC>, /phase-3 <BC>) take BC as an explicit argument and write only to per-BC artifact paths, so multiple developers can work on different BCs in parallel without cursor-file contention. Trigger whenever the user asks for architecture planning or design; discusses Bounded Context, Aggregate, Ubiquitous Language, ADRs, AI intervention decisions, domain events, or scenario modeling; reviews an existing architecture; or uses any of /arch-coach, /phase-1, /phase-2, /phase-3, /phase-4, /arch-learn slash commands.
 license: MIT
 metadata:
   author: jed1978
@@ -42,12 +42,12 @@ Before responding to any architecture question, run the following checks (do not
 1. Check whether `.claude/project-context.md` exists AND fields `project_description` and `tech_stack` are filled.
 2. Check whether `.claude/arch-state.md` exists.
 3. Check whether `.claude/arch-learnings.md` exists.
-4. **Legacy arch-state migration** — if `.claude/arch-state.md` exists AND contains any of the legacy keys (`phase_1_system`, `phase_2_system`, `phase_2_bc`, `phase_3.completed_bcs`, `per_bc_spec_summary`, top-level `reviews:`), migrate before continuing:
-   - Extract `current_focus_bc` / `current_focus_phase` (if present in the legacy file's `Meta` block) into the new shape under `current_focus.bc` / `current_focus.phase`. Map legacy `phase_1` etc. to the new values (e.g., `phase_1` → `phase_1_step_6_7` if a focus BC exists, otherwise `phase_1_step_1_5`).
+4. **Legacy arch-state migration** — if `.claude/arch-state.md` exists AND contains any of the legacy v0.1.0 keys (`phase_1_system`, `phase_2_system`, `phase_2_bc`, `phase_3.completed_bcs`, `per_bc_spec_summary`, top-level `reviews:`), migrate before continuing:
+   - Extract `current_focus_bc` / `current_focus_phase` (if present in the legacy file's `Meta` block) into the new shape under `last_touched.bc` / `last_touched.phase`. Map legacy `phase_1` etc. to the new values (e.g., `phase_1` → `phase_1_step_6_7` if a focus BC exists, otherwise `phase_1_step_1_5`).
    - Extract any entries from the legacy `reviews:` block and append them to `.claude/arch-learnings.md` `phase_4_reviews:`, mapping fields (`phase_reviewed` → `review_scope`, `scorecard` → `scores_summary`, `critical_issues` → `critical_fixes`).
    - Rename the legacy file to `.claude/arch-state.md.legacy` (do not delete).
-   - Write the new minimal `.claude/arch-state.md` from the slim template, populated with the extracted `current_focus` (if any) and today's `last_updated`.
-   - Tell the user: 「偵測到舊版 arch-state.md（鏡像 docs/ddd 的 status / per_bc_spec_summary 等）。已抽出 current_focus、把 reviews 搬到 arch-learnings.md 的 phase_4_reviews 區塊，原檔備份為 `.claude/arch-state.md.legacy`。Phase 進度改由 docs/ddd 推論（見 SKILL.md → State Determination）。」
+   - Write the new minimal `.claude/arch-state.md` from the slim template, populated with the extracted `last_touched.{bc, phase}` (if any) and today's `last_touched.at`.
+   - Tell the user: 「偵測到舊版 arch-state.md（鏡像 docs/ddd 的 status / per_bc_spec_summary 等）。已改寫為 personal cursor schema（`last_touched`），reviews 搬到 arch-learnings.md 的 phase_4_reviews 區塊，原檔備份為 `.claude/arch-state.md.legacy`。Phase 進度改由 docs/ddd 推論（見 SKILL.md → State Determination）。也記得確認 `.gitignore` 是否已包含 `.claude/arch-state.md`（這是個人 cursor，不該 commit）。」
 
 **All three exist (post-migration if applicable) and `project-context.md` is properly filled** → read them in, continue the conversation.
 
@@ -74,6 +74,12 @@ Then ask, in one message (do not interrogate one-by-one):
 - 把 `assets/templates/arch-learnings-template.md` 複製到 `.claude/arch-learnings.md`
 - 把 `assets/agents/bc-developer.md` 複製到 `.claude/agents/`
 - 把 `assets/commands/` 下的所有 `.md` 複製到 `.claude/commands/`
+- **確保 `.claude/arch-state.md` 已被 gitignore**：開啟專案根目錄的 `.gitignore`（不存在則建立）。若該檔案內容沒有覆蓋 `.claude/arch-state.md` 的 pattern，就 append：
+  ```
+  # DDD Architecture Coach — personal cursor, do not commit
+  .claude/arch-state.md
+  ```
+  這是必要步驟：`arch-state.md` 是個人 cursor 狀態，若整個團隊都 commit 進倉庫，每個 phase 指令都會造成 merge conflict。已存在的 entry 不要重複 append（idempotent）。
 - 在 `coach_output_root` 指定的位置建立空目錄（mkdir -p）
 - 顯示填好的 `project-context.md` 草稿並問：「以下是我依你的回答產生的草稿。**有哪幾欄你想改？**」
 
@@ -243,37 +249,73 @@ These produce `{coach_output_root}/{bc}/discovery.md`, `{coach_output_root}/{bc}
 
 **Phase 4** can review any artifact at any time.
 
-**State determination** — phase progress is **derived from the filesystem**, not stored. `arch-state.md` only carries `current_focus` (intent — which BC, which phase the user last asked to work on). On entry:
+**State determination** — phase progress is **derived from the filesystem**, not stored. `arch-state.md` is a **personal, gitignored cursor** that only carries `last_touched` (a hint for "where did the user last leave off") and is consulted ONLY as a fallback when `/arch-coach` is invoked with no arguments. Per-BC phase commands take BC explicitly and do NOT fall back to `last_touched.bc` — this is what enables a team to develop multiple BCs in parallel without contention on the cursor file.
 
-1. **Read intent** from `.claude/arch-state.md` → `current_focus.{bc, phase}`.
-2. **Probe artifacts** under `{coach_output_root}/`:
-   - `system_step_1_2_done` ← `system/domain-stories.md` exists
-   - `system_step_3_4_done` ← `system/context-map.md` has the classification section
-   - `system_step_5_done` ← `system/touchpoints.md` exists
-   - `system_p1_done` ← all three of the above (Phase 1 system-level Steps 1-5 complete)
-   - `system_p2_full_done` ← `system/context-map.md` has both relationships and deployment sections
-   - For each `{bc}/` directory:
-     - `p1_done[bc]` ← `discovery.md` exists
-     - `p2_done[bc]` ← `decisions.md` exists
-     - `p3_done[bc]` ← `spec.md` exists
-     - `p3_stable[bc]` ← `spec.md` frontmatter `status: v1.x`
-3. **Pick phase** (in order):
-   - User invoked `/phase-N` → enter that phase; ask which BC if Phase 2/3/4; update `current_focus`.
-   - `current_focus` is set → cross-check against probe results. If consistent (e.g., focus is `phase_2` for `bc-a` and `decisions.md` does not yet exist) → resume there. If inconsistent (focus is `phase_2` but `bc-a/decisions.md` already exists) → flag the conflict and ask the user: 「current_focus 標 phase_2，但 decisions.md 已存在 — 要 review 既有 decisions、切到 phase_3、還是其他？」
-   - `current_focus` is empty → walk the cascade:
-     - `!system_step_1_2_done` → Phase 1 Steps 1-2 (start of system-level flow)
-     - `system_step_1_2_done && !system_step_3_4_done` → Phase 1 Steps 3-4 (BC delineation + classification)
-     - `system_step_3_4_done && !system_step_5_done` → Phase 1 Step 5 (Touchpoint Map)
-     - `system_p1_done && !system_p2_full_done` → ask user: continue with Phase 1 Steps 6-7 for a BC, or jump to Phase 2 system-level for relationships/deployment?
-     - All system-level done, no BC dirs exist → ask which BC to start; enter Phase 1 Steps 6-7 for that BC
-     - For the most-recently-touched BC `b` (or ask the user if ambiguous):
-       - `p1_done[b] && !p2_done[b]` → Phase 2 for `b`
-       - `p2_done[b] && !p3_done[b]` → Phase 3 for `b`
-       - `p3_done[b]` → ask the user (review existing? add a new BC? move to next BC's Phase 2/3?)
-   - User requests review (and any artifact exists) → Phase 4.
-4. **Sync `current_focus`** after the phase entry decision is made (write `bc` + `phase` + `last_updated`).
+The skill is invoked in three ways. Each produces a `(bc, phase)` decision:
 
-**Backward-compat for v0.1.0 projects without `touchpoints.md`**: if `system_step_1_2_done && system_step_3_4_done && !system_step_5_done` AND BC dirs exist (i.e., a project that already moved past Phase 1 system-level under the old skill version), do NOT block Phase 2/3 work — instead, before each Phase 2/3 entry, output a one-line warning: 「⚠️ Phase 1 Step 5 Touchpoint Map 沒做；目前的 BC integration 設計可能漏掉 secondary observers（例：客服 console 即時同步、audit/compliance 觀察者）。建議：暫停目前 phase 補 Touchpoint Map（10-30 min），或記下風險繼續。」 If user chooses to continue, append an entry to `arch-learnings.md` `open_questions:` so the gap is tracked, not lost.
+#### A. User invoked `/phase-N` (with or without BC arg)
+
+1. **Phase** is fixed by the command (`/phase-1` → Phase 1; `/phase-2` → Phase 2; …).
+2. **BC** comes from `$ARGUMENTS`:
+   - For per-BC phases that REQUIRE BC (`/phase-2`, `/phase-3`, `/phase-1` when `$ARGUMENTS` is non-empty for Steps 6–7, `/phase-4 <BC>`): if BC missing where required, error and exit. Do NOT fall back to `last_touched.bc`.
+   - For system-level entries (`/phase-1` with no `$ARGUMENTS` → Steps 1–5; `/phase-4` with no `$ARGUMENTS` → full review; `/phase-4 system` / `/phase-4 Phase 1` / `/phase-4 Phase 2` → system-scope): BC is empty.
+3. **Probe artifacts** to pre-flight prerequisites (see "Filesystem probing rules" below). If prerequisites missing (e.g., `/phase-2 X` but `X/discovery.md` does not exist), pause and ask the user how to proceed.
+4. **On entry**: write `last_touched: { bc, phase, at: <today> }` to `.claude/arch-state.md`.
+
+#### B. User invoked `/arch-coach <BC>`
+
+1. **BC**: from `$ARGUMENTS`.
+2. **Phase**: derived by probing `{coach_output_root}/{bc}/`:
+   - No `discovery.md` → Phase 1 Steps 6–7 (pre-flight: confirm system-level Steps 1–5 done; if not, redirect user to `/phase-1` with no args)
+   - `discovery.md` exists, no `decisions.md` → Phase 2
+   - `decisions.md` exists, no `spec.md` OR `spec.md` frontmatter `status: draft` → Phase 3
+   - `spec.md` frontmatter `status: v1.x` → BC is stable; suggest `/phase-4 Phase 3:<BC>` for review
+3. **On entry**: same `last_touched` write as A.
+
+#### C. User invoked `/arch-coach` with no arguments
+
+1. **Read** `.claude/arch-state.md` for `last_touched` (silent migration if old `current_focus` schema — see Migration block below).
+2. **Probe filesystem** to enumerate in-flight work:
+   - System-level: which of Steps 1–5 are done? `touchpoints.md` present?
+   - For each subdirectory under `{coach_output_root}/` (excluding `system/`): derive next-phase as in case B.
+3. **Three sub-cases:**
+   - **Nothing in flight** (no `{coach_output_root}/system/` files AND no BC subdirectories) → tell the user: 「尚無 in-flight BC。建議從 `/phase-1` 開始（system-level Domain Discovery — Steps 1–5）。」 Do NOT enter any phase automatically.
+   - **System-level still incomplete** (system Steps 1–5 not all done) → tell the user where the gap is and suggest `/phase-1` (no args).
+   - **At least one BC in flight** → render an in-flight summary table (BC, last completed phase, next phase, notes), then ask the user which BC to focus on. Suggest `last_touched.bc` as default if it's still in flight; otherwise suggest the most recently modified BC by file mtime under `{coach_output_root}/{bc}/`.
+4. Once the user picks a BC → behave as case B from that point.
+
+#### Filesystem probing rules
+
+For each probe, the file's mere existence is the completion signal (do NOT mirror these into `arch-state.md`):
+
+- `system_step_1_2_done` ← `system/domain-stories.md` exists
+- `system_step_3_4_done` ← `system/context-map.md` has the classification section
+- `system_step_5_done` ← `system/touchpoints.md` exists
+- `system_p1_done` ← all three of the above (Phase 1 system-level Steps 1–5 complete)
+- `system_p2_full_done` ← `system/context-map.md` has both relationships and deployment sections
+- For each `{bc}/` directory:
+  - `p1_done[bc]` ← `discovery.md` exists
+  - `p2_done[bc]` ← `decisions.md` exists
+  - `p3_done[bc]` ← `spec.md` exists
+  - `p3_stable[bc]` ← `spec.md` frontmatter `status: v1.x`
+
+Phase 4 has no completion gate — it can review any artifact at any time.
+
+#### Backward-compat: `touchpoints.md` missing
+
+If `system_step_1_2_done && system_step_3_4_done && !system_step_5_done` AND BC dirs exist (i.e., a project that already moved past Phase 1 system-level under an older skill version), do NOT block Phase 2/3 work — instead, before each Phase 2/3 entry, output a one-line warning: 「⚠️ Phase 1 Step 5 Touchpoint Map 沒做；目前的 BC integration 設計可能漏掉 secondary observers（例：客服 console 即時同步、audit/compliance 觀察者）。建議：暫停目前 phase 補 Touchpoint Map（10-30 min），或記下風險繼續。」 If user chooses to continue, append an entry to `arch-learnings.md` `open_questions:` so the gap is tracked, not lost.
+
+#### Migration from old schema (`current_focus` → `last_touched`)
+
+On any read of `.claude/arch-state.md`, if the file contains `current_focus:` instead of `last_touched:`:
+
+1. Rename the top-level key `current_focus:` → `last_touched:`.
+2. Move the top-level `last_updated:` value into `last_touched.at:`.
+3. Write the migrated file back.
+4. **Check whether `.claude/arch-state.md` is gitignored.** If the project's `.gitignore` does NOT cover this path, append the gitignore entry (same as Bootstrap step 6) AND tell the user once: 「順帶一提：`arch-state.md` 已改為個人 cursor，剛才順手加進 `.gitignore`。若 git 已經 track 過這個檔案，記得 `git rm --cached .claude/arch-state.md` 一次。」
+5. Continue normally.
+
+This migration is otherwise silent (do not announce the schema rename) and idempotent. It runs on top of (i.e., AFTER) the legacy v0.1.0 migration in the Bootstrap section.
 
 **Cross-phase contradiction detection**: before entering any phase, verify that prior phase output does not contradict decisions about to be made. Contradiction detected → pause, flag, suggest rolling back.
 
@@ -314,7 +356,7 @@ There are three distinct stores. Do not mix them:
 | Layer | File | Scope | Write frequency | Conflict priority |
 |-------|------|-------|-----------------|-------------------|
 | User-level | Claude Code memory (`/Users/.../memory/` etc.) | Personal, cross-project preferences (「我都不要囉嗦」, 「我偏好 Hexagonal」) | Low | Lowest |
-| Project current focus | `.claude/arch-state.md` | Intent only: `current_focus.{bc, phase}` + `last_updated`. Phase progress is derived from `{coach_output_root}/` filesystem, not stored. | Low — only when focus moves | Mid (factual) |
+| Personal cursor (gitignored) | `.claude/arch-state.md` | Per-developer hint only: `last_touched.{bc, phase, at}`. Read by `/arch-coach` with no args; ignored by per-BC phase commands. Phase progress is derived from `{coach_output_root}/` filesystem, not stored. | Low — only when focus moves | Mid (factual) |
 | Project learnings | `.claude/arch-learnings.md` | Decision history, Phase 4 ⚠️/❌ findings, cross-phase open questions, user-triggered learnings, Phase 4 review audit (`phase_4_reviews:` block), shipped slice summaries (`slices_shipped:` block) | Append-only | Highest (project-level convention) |
 
 **Conflict rule**: project learnings > project current focus > personal preferences. Project-level conventions trump personal preferences (avoid leaking individual habits into team artifacts).
@@ -325,7 +367,7 @@ There are three distinct stores. Do not mix them:
 - Phase 4 Review ⚠️/❌ findings → auto-written to `arch-learnings.md` (`source: phase_4`).
 - Phase 4 Review per-run audit record (date, scope, scores, critical fixes, rollback flag) → `arch-learnings.md` `phase_4_reviews:` block.
 - `/arch-learn <content>` → `arch-learnings.md` by default; if content reads as personal preference, suggest writing to memory instead.
-- Current focus (which BC, which phase the user is working on) → `arch-state.md` `current_focus`. Phase completion / output paths / per-BC summaries are NOT stored — they are derived from filesystem (see State Determination above).
+- Last-touched cursor (which BC, which phase the user last entered) → `arch-state.md` `last_touched`. Personal/gitignored; per-BC phase commands take BC explicitly and do NOT read this for BC selection. Phase completion / output paths / per-BC summaries are NOT stored — they are derived from filesystem (see State Determination above).
 
 **Before entering any phase, read all three layers** (memory + arch-state + arch-learnings) and fold relevant items into your guidance — do not quote them back, just apply. Example: if learnings contains 「本專案 explanation mode 預設關閉」, skip decision-point commentary from the start.
 
@@ -335,8 +377,8 @@ There are three distinct stores. Do not mix them:
 
 This skill ships command templates at `assets/commands/`. Bootstrap copies them to `.claude/commands/`:
 
-- `/arch-coach` — launch the coach, read state, continue from current phase
-- `/phase-1` `/phase-2` `/phase-3` `/phase-4` — force entry into the corresponding phase (Phase 3 requires BC name as argument)
+- `/arch-coach` — launch the coach. With no arguments, shows an in-flight summary derived from `{coach_output_root}/` and asks which BC to enter. With a BC argument, derives next phase for that BC.
+- `/phase-1` `/phase-2` `/phase-3` `/phase-4` — force entry into the corresponding phase. `/phase-2 <BC>` and `/phase-3 <BC>` REQUIRE a BC argument (error if missing). `/phase-1` accepts BC optionally (no arg → system Steps 1–5; with BC → per-BC Steps 6–7). `/phase-4` accepts an optional scope argument (`Phase 1` / `Phase 2` / `Phase 3:<BC>` / `<BC>` / `system` / `full`). Per-BC commands do NOT fall back to `last_touched.bc` — explicit BC arg is required so multiple developers can run different BCs in parallel.
 - `/arch-learn <learning>` — append a learning (the command itself helps decide whether it should go to `arch-learnings.md` or Claude Code memory; see Memory / State / Learnings section)
 
 If the user invokes one of these but the file is missing in `.claude/commands/`, run Bootstrap to copy the templates. As a last resort, treat the command as a prompt prefix and proceed normally.

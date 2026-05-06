@@ -269,7 +269,7 @@ After review is accepted by the user:
 2. **Patterns that recur across BCs** → generalize and append with `applies_to: all`
 3. **User's challenges to your scoring** (where you changed a score based on their context) → append as learning with note on why the context changed the judgment
 
-`arch-state.md` is touched only to update `current_focus` (e.g., when a rollback retargets a phase) and `last_updated` — see Phase 4 Output Checklist below. Per-review audit data (date, scope, scores, critical fixes, rollback flag) goes into `arch-learnings.md` `phase_4_reviews:`.
+`arch-state.md` is touched only when a review concludes with a rollback retarget (or the user moves to a different BC after review) — and even then, only the personal cursor `last_touched: { bc, phase, at }` is updated. See Phase 4 Output Checklist below. Per-review audit data (date, scope, scores, critical fixes, rollback flag) goes into `arch-learnings.md` `phase_4_reviews:` (which is the team-shared file).
 
 This prevents the next BC's Phase 3 (or next project's Phase 2) from repeating the same mistakes.
 
@@ -298,4 +298,4 @@ Phase 4 review records are append-only audit data and live in `arch-learnings.md
   - `rollback_recommended` — `true` | `false`
   - `target_rollback_phase` — only when `rollback_recommended: true`
 - Append individual learnings (the qualitative lessons distilled from this review) to `arch-learnings.md` `learnings:` with `source: phase_4` (per Learnings Writeback section above).
-- Update `arch-state.md` `current_focus` if the review concluded a rollback (point at the target phase) or moved to a new BC; update `last_updated`.
+- If the review concluded a rollback retarget (or the user explicitly moves to a different BC after review): update `arch-state.md` `last_touched: { bc: <retarget BC or empty>, phase: <retarget phase>, at: <today> }`. Otherwise leave `arch-state.md` alone — Phase 4 review by itself does not move the personal cursor.

@@ -15,6 +15,8 @@
 
 輸出採 BC-centric 檔案結構。每個 BC 獨立走 discovery → design → spec，支援漸進開發。
 
+**團隊平行開發**：per-BC 指令（`/phase-2 <BC>`、`/phase-3 <BC>`）以 BC 名稱為必填參數，artifacts 都寫在各自 `{coach_output_root}/{bc}/` 路徑下。多位開發者可同時各自負責不同 BC、各跑各的 phase，不會在共享狀態檔上產生衝突。`.claude/arch-state.md` 是個人 cursor（bootstrap 時自動加入 `.gitignore`），團隊知識則寫在 `.claude/arch-learnings.md`（append-only，已適合 commit）。
+
 ## Skill 構成
 
 這個 skill 套件包含兩個職責分離、共享同一套 DDD 紀律的元件：
@@ -96,7 +98,7 @@ ddd-architecture-coach/
     │   └── arch-learn.md                  # 寫一條 learning
     └── templates/
         ├── project-context-template.md    # 專案描述、tech stack、model 選擇
-        ├── arch-state-template.md         # coach 維護：current_focus + last_updated（其餘進度從 docs/ddd 推論）
+        ├── arch-state-template.md         # 個人 cursor（gitignored）：last_touched.{bc, phase, at}（其餘進度從 docs/ddd 推論）
         └── arch-learnings-template.md     # coach 維護：learnings + open questions（append-only）
 ```
 

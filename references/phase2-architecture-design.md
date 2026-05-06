@@ -599,19 +599,17 @@ If sync audit fails, fix Phase 1 first (or document Phase 2's deviation with rat
 
 ## Phase 2 Output Checklist
 
-Phase progress is derived from filesystem (see SKILL.md → State Determination); do NOT mirror status, output paths, or per-BC summaries into `arch-state.md`. Only update `current_focus` and `last_updated`.
+Phase progress is derived from filesystem (see SKILL.md → State Determination); do NOT mirror status, output paths, or per-BC summaries into `arch-state.md`. The only `arch-state.md` write is the personal cursor `last_touched: { bc, phase, at }` — gitignored, per-developer state, not team coordination.
 
 When Phase 2 system-level reaches stable v1.x:
 
 - Ensure `{coach_output_root}/system/context-map.md` includes both the relationships and deployment sections (their presence IS the completion signal). The deployment decision (Modular Monolith / Microservices / etc.) lives in the document, not in arch-state.
-- Update `arch-state.md` `current_focus` to point at whichever BC's Phase 2 (or Phase 3) is next.
-- Update `last_updated`.
+- Update `arch-state.md` `last_touched: { bc: '', phase: phase_2, at: <today> }` (or whichever BC the user is heading into next).
 
 When Phase 2 per-BC reaches stable:
 
 - Ensure `{coach_output_root}/{bc}/decisions.md` is written (its existence IS the completion signal). Decisions count, AI-ADRs, and rejection count live in that document.
-- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically `phase_3` for the same BC).
-- Update `last_updated`.
+- Update `arch-state.md` `last_touched: { bc: <BC>, phase: phase_2, at: <today> }`. The user can subsequently invoke `/phase-3 <BC>` explicitly — do not pre-update `last_touched.phase` to `phase_3` based on assumed next-step intent.
 
 Append to `arch-learnings.md`:
 

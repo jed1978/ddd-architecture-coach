@@ -524,7 +524,7 @@ Each slice must pass:
 Before opening MVP1 slice, these must be complete:
 
 - `.claude/rules/{bc}.md` drafted (see §11.4)
-- Phase 3 spec marked `v1.x ready_for_mvp1` in arch-state
+- Phase 3 spec frontmatter set to `status: v1.x` (the spec's own frontmatter — not arch-state — is the source of truth for stability)
 - Pre-flight: confirm Phase 1/2 outputs match Phase 3 (no contradictions)
 
 #### §11.4 `.claude/rules/{bc}.md` (Implementation Rules Card)
@@ -1248,8 +1248,7 @@ Phase progress is derived from `{coach_output_root}/{bc}/spec.md` existence; spe
 When this BC's Phase 3 reaches v1.x stable (no more spec-structure changes expected):
 
 - Update `{coach_output_root}/{bc}/spec.md` frontmatter `status: v1.x` (until then, keep `status: draft`). This is the signal that the spec is ready to serve as a `template-from-prior` template for subsequent BCs.
-- Update `arch-state.md` `current_focus.{bc, phase}` to reflect what's next (typically the next BC's Phase 1 Steps 6-7, or staying on this BC for Phase 4 review).
-- Update `last_updated`.
+- Update `arch-state.md` `last_touched: { bc: <BC>, phase: phase_3, at: <today> }`. This is the personal cursor only — when the user moves to the next BC or to Phase 4, they will invoke that command explicitly and the cursor will update on entry. Do not pre-write a future intent.
 
 Per-BC summary data (aggregates + invariant counts + events emitted + repository count + integration count + test scenario count) lives in `spec.md` itself, where it is the canonical source — not duplicated to arch-state.
 

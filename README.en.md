@@ -15,6 +15,8 @@ Guides you through four phases of architecture planning:
 
 Output is organized in a BC-centric file structure. Each BC independently progresses through discovery → design → spec, enabling incremental development.
 
+**Parallel team development**: per-BC commands (`/phase-2 <BC>`, `/phase-3 <BC>`) take BC name as a required argument, and artifacts are written under each BC's own `{coach_output_root}/{bc}/` path. Multiple developers can each own a different BC and run their own phases simultaneously without contending on a shared state file. `.claude/arch-state.md` is a personal cursor (added to `.gitignore` at bootstrap); team-shared knowledge lives in `.claude/arch-learnings.md` (append-only, safe to commit).
+
 ## Skill Components
 
 This skill ships two responsibility-separated components sharing one DDD discipline:
@@ -95,7 +97,7 @@ ddd-architecture-coach/
     │   └── arch-learn.md                  # Append a learning
     └── templates/
         ├── project-context-template.md    # Project description, tech stack, model choice
-        ├── arch-state-template.md         # Coach maintains: current_focus + last_updated (phase progress is derived from docs/ddd)
+        ├── arch-state-template.md         # Personal cursor (gitignored): last_touched.{bc, phase, at} (phase progress is derived from docs/ddd)
         └── arch-learnings-template.md     # Coach maintains: learnings + open questions (append-only)
 ```
 

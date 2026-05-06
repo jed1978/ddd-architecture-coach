@@ -1,7 +1,7 @@
 # Project Context
 
 > This file is filled in by the user and read by the DDD Architecture Coach.
-> When you modify anything here, also update `last_updated` in `.claude/arch-state.md`.
+> Edits here do NOT need any manual sync — the skill's personal cursor (`.claude/arch-state.md` `last_touched.at`) is updated automatically when you next invoke a phase command.
 > Format: YAML-in-Markdown. The coach parses ```yaml blocks.
 > Write your content in whatever language you work in — Chinese or English is fine.
 
